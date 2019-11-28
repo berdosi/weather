@@ -1,5 +1,5 @@
 <?php
-\OCP\Util::addScript('weather', 'angular.min');
+\OCP\Util::addScript('weather', 'vue.min');
 \OCP\Util::addScript('weather', 'app');
 \OCP\Util::addStyle('weather', 'style');
 ?>
@@ -7,21 +7,21 @@
 <div class="ng-scope" id="app" ng-app="Weather" ng-controller="WeatherController">
 	<div id="city-list-left">
 		<ul class="city-list">
-			<li ng-repeat="city in cities" class="city-list-item {{ city.id == selectedCityId ? 'selected' : ''}}">
+			<li v-for="city in cities" ng-repeat="city in cities" class="city-list-item {{ city.id == selectedCityId ? 'selected' : ''}}">
 				<a href="#" ng-click="loadCity(city);">{{ city.name }}</a>
-				<div class="icon-delete svn delete action" ng-click="deleteCity(city);"></div>
+				<div class="icon-delete svn delete action" ng-click="deleteCity(city);" v-on:click="deleteCity(city)" ></div>
 			</li>
 			<li>
 				<a href="#" ng-click="city.name = ''; addCityError = ''; showAddCity = true;"><?php p($l->t('Add a city')); ?>...</a>
 				<div ng-show="showAddCity == true" id="create-city">
-					<h1><?php p($l->t('Add city')); ?></h1>
+					<h1><?php p($l->t('Add city')); ?>sad</h1>
 					<hr>
 					<h2><?php p($l->t('City name')); ?></h2>
 					<span class="city-form-error" ng-show="addCityError != ''">{{ addCityError }}</span>
 					<form novalidate>
-						<input type="textbox" ng-model="city.name"/>
-						<input type="submit" value="<?php p($l->t('Add')); ?>" ng-click="addCity(city);"/>
-						<input type="button" value="<?php p($l->t('Cancel')); ?>" ng-click="showAddCity = false;"/>
+						<input type="textbox" v-model="city.name" ng-model="city.name"/>
+						<input type="button" value="<?php p($l->t('Add')); ?>" v-on:click="addCity(city)" ng-click="addCity(city);"/>
+						<input type="button" value="<?php p($l->t('Cancel')); ?>" v-on:click="showAddCity = false" ng-click="showAddCity = false;"/>
 					</form>
 				</div>
 			</li>
@@ -70,7 +70,7 @@
 					<th><?php p($l->t('Humidity')); ?></th>
 					<th><?php p($l->t('Wind')); ?></th>
 				</tr>
-				<tr ng-repeat="forecast in currentCity.forecast">
+				<tr  v-for="forecast in currentCity.forecast" ng-repeat="forecast in currentCity.forecast">
 					<td>{{ forecast.date }}</td>
 					<td>{{ forecast.temperature }}{{ metricRepresentation }}</td>
 					<td>{{ forecast.weather }}</td>
