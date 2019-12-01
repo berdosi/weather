@@ -1,5 +1,6 @@
 <?php
-\OCP\Util::addScript('weather', 'vue.min');
+// \OCP\Util::addScript('weather', 'vue.min');
+\OCP\Util::addScript('weather', 'vue');
 \OCP\Util::addScript('weather', 'app');
 \OCP\Util::addStyle('weather', 'style');
 ?>
@@ -8,16 +9,16 @@
 	<div id="city-list-left">
 		<ul class="city-list">
 			<li v-for="city in cities" ng-repeat="city in cities" class="city-list-item {{ city.id == selectedCityId ? 'selected' : ''}}">
-				<a href="#" ng-click="loadCity(city);">{{ city.name }}</a>
+				<a href="#" v-on:click="loadCity(city)" ng-click="loadCity(city);">{{ city.name }}</a>
 				<div class="icon-delete svn delete action" ng-click="deleteCity(city);" v-on:click="deleteCity(city)" ></div>
 			</li>
 			<li>
-				<a href="#" ng-click="city.name = ''; addCityError = ''; showAddCity = true;"><?php p($l->t('Add a city')); ?>...</a>
-				<div ng-show="showAddCity == true" id="create-city">
-					<h1><?php p($l->t('Add city')); ?>sad</h1>
+				<a href="#" v-on:click="city.name = ''; addCityError = ''; showAddCity = true;" ng-click="city.name = ''; addCityError = ''; showAddCity = true;"><?php p($l->t('Add a city')); ?>...</a>
+				<div v-show="showAddCity == true" ng-show="showAddCity == true" id="create-city">
+					<h1><?php p($l->t('Add city')); ?></h1>
 					<hr>
 					<h2><?php p($l->t('City name')); ?></h2>
-					<span class="city-form-error" ng-show="addCityError != ''">{{ addCityError }}</span>
+					<span class="city-form-error" v-show="addCityError != ''" ng-show="addCityError != ''">{{ addCityError }}</span>
 					<form novalidate>
 						<input type="textbox" v-model="city.name" ng-model="city.name"/>
 						<input type="button" value="<?php p($l->t('Add')); ?>" v-on:click="addCity(city)" ng-click="addCity(city);"/>
@@ -32,7 +33,7 @@
 			</div>
 			<div style="display: none;" id="app-settings-content">
 				<h2><?php p($l->t('Metric')); ?></h2>
-				<select name="metric" ng-change="modifyMetric()" ng-model="metric">
+				<select name="metric" v-on:change="modifyMetric()" ng-change="modifyMetric()" v-model="metric" ng-model="metric">
 					<option value="metric">°C</option>
 					<option value="kelvin">°K</option>
 					<option value="imperial">°F</option>
@@ -40,18 +41,18 @@
 			</div>
 		</div>
 	</div>
-	<div id="city-right" ng-show="cityLoadError != ''">
+	<div id="city-right" v-show="cityLoadError != ''" ng-show="cityLoadError != ''">
 		<span class="city-load-error">
 			{{ cityLoadError }}<br /><br />
-			<a href="http://home.openweathermap.org/users/sign_in" ng-show="cityLoadNeedsAPIKey == true"><?php p($l->t('Click here to get an API key')); ?></a>
+			<a href="http://home.openweathermap.org/users/sign_in" v-show="cityLoadNeedsAPIKey == true" ng-show="cityLoadNeedsAPIKey == true"><?php p($l->t('Click here to get an API key')); ?></a>
 		</span>
 	</div>
-	<div id="city-right" ng-show="cityLoadError == '' && currentCity != null" style="background-image: url('{{ owncloudAppImgPath }}{{ currentCity.image }}');">
+	<div id="city-right" v-show="cityLoadError == '' && currentCity != null" ng-show="cityLoadError == '' && currentCity != null" style="background-image: url('{{ owncloudAppImgPath }}{{ currentCity.image }}');">
 		<div id="city-weather-panel">
 			<div class="city-name">
 				{{ currentCity.name }}, {{ currentCity.sys.country }}
-				<img ng-show="selectedCityId == homeCity" src="{{ owncloudAppImgPath }}home-pick.png" />
-				<img class="home-icon" ng-click="setHome(selectedCityId);" ng-show="selectedCityId != homeCity" src="{{ owncloudAppImgPath }}home-nopick.png" />
+				<img v-show="selectedCityId == homeCity" ng-show="selectedCityId == homeCity" src="{{ owncloudAppImgPath }}home-pick.png" />
+				<img class="home-icon" v-on:click="setHome(selectedCityId)" ng-click="setHome(selectedCityId);" v-show="selectedCityId != homeCity" ng-show="selectedCityId != homeCity" src="{{ owncloudAppImgPath }}home-nopick.png" />
 			</div>
 			<div class="city-current-temp">{{ currentCity.main.temp }}{{ metricRepresentation }}</div>
 			<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ currentCity.main.pressure }} hpa</div>

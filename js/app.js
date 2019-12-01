@@ -17,6 +17,10 @@
 		return undef(obj) || obj == '';
 	}
 
+	function deepCopy(obj) {
+		JSON.parse(JSON.stringify(obj)); 
+	}
+
 	var $http = {
 		post: function(url, requestBody) {
 			return new Promise(
@@ -113,9 +117,37 @@
 		'showAddCity': false,
 	},
 	'methods': {
-		'deleteCity': function(ev) { console.log(ev) },
+		'deleteCity': function(city) { 
+			let $scope = weatherApp;
+			if (undef(city)) {
+				alert(g_error500);
+				return;
+			}
+
+			$http.post(OC.generateUrl('/apps/weather/city/delete'), {'id': city.id}).
+			then(function (r) {
+				if (r.data != null && !undef(r.data['deleted'])) {
+					for (var i = 0; i < $scope.cities.length; i++) {
+						if ($scope.cities[i].id === city.id) {
+							$scope.cities.splice(i, 1);
+							// If current city is the removed city, close it
+							if ($scope.selectedCityId === city.id) {
+								$scope.currentCity = null;
+								$scope.selectedCityId = 0;
+							}
+							return;
+						}
+					}
+				}
+				else {
+					alert(t('weather', 'Failed to remove city. Please contact your administrator'));
+				}
+			},
+			function (r) {
+				alert(g_error500);
+			});
+		}.bind(this),
 		'addCity': function(city) { 
-		(function(city) {
 			$scope = weatherApp;
 			if (undef(city) || emptyStr(city.name)) {
 				$scope.addCityError = t('weather', 'Empty city name!');
@@ -129,7 +161,7 @@
 					$scope.showAddCity = false;
 
 					if (!undef(r.data['load']) && r.data['load']) {
-						loadingCity = angular.copy(city);
+						loadingCity = deepCopy(city);
 						loadingCity.id = r.data['id'];
 						$scope.loadCity(loadingCity);
 					}
@@ -138,7 +170,7 @@
 				else {
 					$scope.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
 				}
-			},
+			}.bind(this),
 			function (r) {
 				if (r.status == 401) {
 					$scope.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
@@ -152,9 +184,72 @@
 				else {
 					$scope.addCityError = g_error500;
 				}
+			}.bind(this));
+		}.bind(this),
+		'mapMetric': function () {
+			if ($scope.metric == 'kelvin') {
+				$scope.metricRepresentation = '°K';
+			}
+			else if ($scope.metric == 'imperial') {
+				$scope.metricRepresentation = '°F';
+			}
+			else {
+				$scope.metric = 'metric';
+				$scope.metricRepresentation = '°C';
+			}
+		}.bind(this),
+		'modifyMetric': function () {
+			$http.post(OC.generateUrl('/apps/weather/settings/metric/set'), {'metric': $scope.metric}).
+			then(function (r) {
+				if (r.data != null && !undef(r.data['set'])) {
+					$scope.mapMetric();
+					$scope.loadCity($scope.domCity);
+				}
+				else {
+					$scope.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
+				}
+			},
+			function (r) {
+				if (r.status == 404) {
+					$scope.settingError = t('weather', 'This metric is not known.');
+				}
+				else {
+					$scope.settingError = g_error500;
+				}
 			});
-		})(city);
-	}.bind(this)
+		}.bind(this),
+		'loadMetric': function () {
+			$http.get(OC.generateUrl('/apps/weather/settings/metric/get')).
+			then(function (r) {
+				if (!undef(r.data['metric'])) {
+					$scope.metric = r.data['metric'];
+					$scope.mapMetric();
+				}
+			},
+			function (r) {
+				$scope.fatalError();
+			});
+		}.bind(this),
+		'setHome': function(cityId) {
+			if (undef(cityId)) {
+				alert(g_error500);
+				return;
+			}
+
+			$http.post(OC.generateUrl('/apps/weather/settings/home/set'), {'city': cityId}).
+			then(function (r) {
+				if (r.data != null && !undef(r.data['set'])) {
+					$scope.homeCity = cityId;
+				}
+				else {
+					alert(t('weather', 'Failed to set home. Please contact your administrator'));
+				}
+			},
+			function (r) {
+				alert(g_error500);
+			});
+		}.bind(this)
+		
 	},
 	'created': function() {
 		(function loadCities() {
@@ -262,10 +357,10 @@
 					$scope.loadCity($scope.cities[0]);
 				}
 		
-			},
+			}.bind(this),
 			function (r) {
 				$scope.fatalError(r);
-			});
+			}.bind(this));
 		}.bind(this))()
 	}
 });
@@ -494,7 +589,7 @@ function angularVersion() {
 						$scope.showAddCity = false;
 	
 						if (!undef(r.data['load']) && r.data['load']) {
-							loadingCity = angular.copy(city);
+							loadingCity = deepCopy(city);
 							loadingCity.id = r.data['id'];
 							$scope.loadCity(loadingCity);
 						}
