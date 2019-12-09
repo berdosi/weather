@@ -50,15 +50,6 @@
 		}
 	}
 
-	function $interval(intervalFunction, interval) {
-		window.setInterval(intervalFunction, interval);
-	}
-
-	function $timeout(timeoutFunction, delay) {
-		if (delay === undefined) delay = 0;
-		window.setTimeout(timeoutFunction, delay);
-	}
-
 	var weatherApp = new Vue({
 		'el': '#app',
 		'data': {
@@ -370,16 +361,18 @@
 			}.bind(this)
 		},
 		'created': function created() {
+			// wait a tick so that weatherApp object is set.
+			window.setTimeout(function () {
+				window.setInterval(function () {
+					if (weatherApp.currentCity != null) {
+						weatherApp.loadCity(weatherApp.domCity);
+					}
+				}.bind(weatherApp), 60000);
 
-			window.setInterval(function () {
-				if (weatherApp.currentCity != null) {
-					weatherApp.loadCity(weatherApp.domCity);
-				}
-			}.bind(weatherApp), 60000);
-
-			weatherApp.owncloudAppImgPath = OC.filePath('weather', 'img', '').replace('index.php/', '');
-			weatherApp.loadCities();
-			weatherApp.loadMetric();
+				weatherApp.owncloudAppImgPath = OC.filePath('weather', 'img', '').replace('index.php/', '');
+				weatherApp.loadCities();
+				weatherApp.loadMetric();
+			}.bind(this), 0)
 
 		}.bind(this),
 		'filters': {
