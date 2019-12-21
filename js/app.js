@@ -7,7 +7,7 @@
  * @author Loic Blot <loic.blot@unix-experience.fr>
  * @copyright Loic Blot 2014-2015
  */
-(function WeatherApp() {
+(function WeatherApp($) {
 
 	function undef(obj) {
 		return typeof obj === 'undefined' || obj === undefined;
@@ -21,118 +21,95 @@
 		return JSON.parse(JSON.stringify(obj));
 	}
 
-	var $http = {
-		post: function (url, requestBody) {
-			return new Promise(
-				function (resolve, reject) {
-					fetch(
-						url,
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify(requestBody)
-						})
-						.then(response => response.json())
-						.then(responseJson => resolve({ data: responseJson, status: 200 })) // todo catch status
-						.catch(e => reject(e))
-				});
-		},
-		get: function (url) {
-			return new Promise(
-				function (resolve, reject) {
-					fetch(url, { method: 'GET' })
-						.then(response => response.json())
-						.then(responseJson => resolve({ data: responseJson, status: 200 })) // todo catch status
-						.catch(e => reject(e))
-				});
-		}
-	}
-
 	var weatherApp = new Vue({
 		'el': '#app',
-		'data': {
-			'city': {
-				'name': ''
-			},
-			'cities': [],
-			'userId': '',
-			'home': undefined,
-			'domCity': undefined,
-			'currentCity': {
-				'forecast': [{
-					'date': '',
-					'temperature': '',
-					'weather': '',
-					'pressure': '',
-					'humidity': '',
+		'data': function () {
+			return {
+				'city': {
+					'name': ''
+				},
+				'cities': [],
+				'userId': '',
+				'home': undefined,
+				'domCity': undefined,
+				'currentCity': {
+					'forecast': [{
+						'date': '',
+						'temperature': '',
+						'weather': '',
+						'pressure': '',
+						'humidity': '',
+						'wind': {
+							'speed': '',
+							'desc': ''
+						}
+					}],
+					'name': undefined,
+					'main': {
+						'humidity': '',
+						'pressure': '',
+						'temp': ''
+					},
+					'image': undefined,
+					'sys': {
+						'country': undefined,
+						'sunrise': 0,
+						'sunset': 0
+					},
+					'weather': [
+						{
+							'main': '',
+							'description': ''
+						}
+					],
 					'wind': {
-						'speed': '',
-						'desc': ''
-					}
-				}],
-				'name': undefined,
-				'main': {
-					'humidity': '',
-					'pressure': '',
-					'temp': ''
+						'desc': undefined,
+						'deg': undefined
+					},
 				},
-				'image': undefined,
-				'sys': {
-					'country': undefined,
-					'sunrise': 0,
-					'sunset': 0
+				'addCityError': '',
+				'cityLoadError': '',
+				'cityLoadNeedsAPIKey': false,
+				'homeCity': '',
+				'imageMapper': {
+					"Clear": "sun.jpg",
+					"Clouds": "clouds.png",
+					"Drizzle": "drizzle.jpg",
+					"Smoke": "todo.png",
+					"Dust": "todo.png",
+					"Sand": "sand.jpg",
+					"Ash": "todo.png",
+					"Squall": "todo.png",
+					"Tornado": "tornado.jpg",
+					"Haze": "mist.jpg",
+					"Mist": "mist.jpg",
+					"Rain": "rain.jpg",
+					"Snow": "snow.png",
+					"Thunderstorm": "thunderstorm.jpg",
+					"Fog": "fog.jpg",
 				},
-				'weather': [
-					{
-						'main': '',
-						'description': ''
-					}
-				],
-				'wind': {
-					'desc': undefined,
-					'deg': undefined
-				},
-			},
-			'addCityError': '',
-			'cityLoadError': '',
-			'cityLoadNeedsAPIKey': false,
-			'homeCity': '',
-			'imageMapper': {
-				"Clear": "sun.jpg",
-				"Clouds": "clouds.png",
-				"Drizzle": "drizzle.jpg",
-				"Smoke": "todo.png",
-				"Dust": "todo.png",
-				"Sand": "sand.jpg",
-				"Ash": "todo.png",
-				"Squall": "todo.png",
-				"Tornado": "tornado.jpg",
-				"Haze": "mist.jpg",
-				"Mist": "mist.jpg",
-				"Rain": "rain.jpg",
-				"Snow": "snow.png",
-				"Thunderstorm": "thunderstorm.jpg",
-				"Fog": "fog.jpg",
-			},
-			'metric': 'metric',
-			'metricRepresentation': '°C',
-			'owncloudAppImgPath': '',
-			'selectedCityId': undefined,
-			'showAddCity': false,
+				'metric': 'metric',
+				'metricRepresentation': '°C',
+				'owncloudAppImgPath': '',
+				'selectedCityId': undefined,
+				'showAddCity': false,
+			}
 		},
 		'methods': {
 			'deleteCity': function deleteCity(city) {
 				if (undef(city)) {
 					console.error(g_error500);
-					// alert(g_error500);
 					return;
 				}
 
-				$http.post(OC.generateUrl('/apps/weather/city/delete'), { 'id': city.id }).
-					then(function (r) {
-						if (r.data != null && !undef(r.data['deleted'])) {
+				$.ajax({
+					type: 'POST',
+					url: OC.generateUrl('/apps/weather/city/delete'),
+					data: { 'id': city.id },
+					dataType: 'json'
+				})
+					.done(function deleteCitySuccess(data) {
+						if (data != null && !undef(data['deleted'])) {
 							for (var i = 0; i < weatherApp.cities.length; i++) {
 								if (weatherApp.cities[i].id === city.id) {
 									weatherApp.cities.splice(i, 1);
@@ -148,11 +125,10 @@
 						else {
 							alert(t('weather', 'Failed to remove city. Please contact your administrator'));
 						}
-					}.bind(this),
-						function (r) {
-							console.error(r, g_error500);
-							// alert(g_error500);
-						}.bind(this));
+					}.bind(this))
+					.fail(function deleteCityFail(r) {
+						console.error(r, g_error500);
+					}.bind(this));
 			}.bind(this),
 			'addCity': function addCity(city) {
 				if (undef(city) || emptyStr(city.name)) {
@@ -160,15 +136,20 @@
 					return;
 				}
 
-				$http.post(OC.generateUrl('/apps/weather/city/add'), { 'name': city.name }).
-					then(function (r) {
-						if (r.data != null && !undef(r.data['id'])) {
-							weatherApp.cities.push({ "name": city.name, "id": r.data['id'] })
+				$.ajax({
+					type: 'POST',
+					url: OC.generateUrl('/apps/weather/city/add'),
+					data: { 'name': city.name },
+					dataType: 'json'
+				})
+					.done(function addCitySuccess(data) {
+						if (data != null && !undef(data['id'])) {
+							weatherApp.cities.push({ "name": city.name, "id": data['id'] })
 							weatherApp.showAddCity = false;
 
-							if (!undef(r.data['load']) && r.data['load']) {
+							if (!undef(data['load']) && data['load']) {
 								var loadingCity = deepCopy(city);
-								loadingCity.id = r.data['id'];
+								loadingCity.id = data['id'];
 								weatherApp.loadCity(loadingCity);
 							}
 							city.name = "";
@@ -176,21 +157,21 @@
 						else {
 							weatherApp.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
 						}
-					}.bind(this),
-						function (r) {
-							if (r.status == 401) {
-								weatherApp.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
-							}
-							else if (r.status == 404) {
-								weatherApp.addCityError = t('weather', 'No city with this name found.');
-							}
-							else if (r.status == 409) {
-								weatherApp.addCityError = t('weather', 'This city is already registered for your account.');
-							}
-							else {
-								weatherApp.addCityError = g_error500;
-							}
-						}.bind(this));
+					}.bind(this))
+					.fail(function addCityFail(r, textStatus, errorThrown) {
+						if (r.status == 401) {
+							weatherApp.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
+						}
+						else if (r.status == 404) {
+							weatherApp.addCityError = t('weather', 'No city with this name found.');
+						}
+						else if (r.status == 409) {
+							weatherApp.addCityError = t('weather', 'This city is already registered for your account.');
+						}
+						else {
+							weatherApp.addCityError = g_error500;
+						}
+					}.bind(this));
 			}.bind(this),
 			'mapMetric': function mapMetric() {
 				if (weatherApp.metric == 'kelvin') {
@@ -205,36 +186,43 @@
 				}
 			}.bind(this),
 			'modifyMetric': function modifyMetric() {
-				$http.post(OC.generateUrl('/apps/weather/settings/metric/set'), { 'metric': weatherApp.metric }).
-					then(function (r) {
-						if (r.data != null && !undef(r.data['set'])) {
+				$.ajax({
+					type: 'POST',
+					url: OC.generateUrl('/apps/weather/settings/metric/set'),
+					data: { 'metric': weatherApp.metric },
+					dataType: 'json'
+				})
+					.done(function modifyMetricSuccess(data) {
+						if (data != null && !undef(data['set'])) {
 							weatherApp.mapMetric();
 							weatherApp.loadCity(weatherApp.domCity);
 						}
 						else {
 							weatherApp.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
 						}
-					}.bind(this),
-						function (r) {
-							if (r.status == 404) {
-								weatherApp.settingError = t('weather', 'This metric is not known.');
-							}
-							else {
-								weatherApp.settingError = g_error500;
-							}
-						}.bind(this));
+					}.bind(this))
+					.fail(function modifyMetricFail(r) {
+						if (r.status == 404) {
+							weatherApp.settingError = t('weather', 'This metric is not known.');
+						}
+						else {
+							weatherApp.settingError = g_error500;
+						}
+					}.bind(this));
 			}.bind(this),
 			'loadMetric': function loadMetric() {
-				$http.get(OC.generateUrl('/apps/weather/settings/metric/get')).
-					then(function (r) {
+				$.ajax({
+					type: "GET",
+					url: OC.generateUrl('/apps/weather/settings/metric/get'),
+					dataType: 'json'
+				})
+					.done(function loadMetricSuccess(r) {
 						if (!undef(r.data['metric'])) {
 							weatherApp.metric = r.data['metric'];
 							weatherApp.mapMetric();
 						}
-					}.bind(this),
-						function (r) {
-							weatherApp.fatalError();
-						}.bind(this));
+					}.bind(this))
+					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
 			}.bind(this),
 			'setHome': function setHome(cityId) {
 				if (undef(cityId)) {
@@ -243,24 +231,29 @@
 					return;
 				}
 
-				$http.post(OC.generateUrl('/apps/weather/settings/home/set'), { 'city': cityId }).
-					then(function (r) {
-						if (r.data != null && !undef(r.data['set'])) {
+				$.ajax({
+					type: 'POST',
+					url: OC.generateUrl('/apps/weather/settings/home/set'),
+					data: { 'city': cityId },
+					dataType: 'json'
+				})
+					.done(function setHomeSuccess(data) {
+						if (data != null && !undef(data['set'])) {
 							weatherApp.homeCity = cityId;
 						}
 						else {
 							alert(t('weather', 'Failed to set home. Please contact your administrator'));
 						}
-					}.bind(this),
-						function (r) {
-							console.error(r, g_error500);
-							// alert(g_error500);
-						}.bind(this));
+					}.bind(this))
+					.fail(function setHomeFail(r) {
+						console.error(r, g_error500);
+						// alert(g_error500);
+					}.bind(this));
 			}.bind(this),
-			'fatalError': function (e) {
+			'fatalError': function fatalError(e) {
 				console.error("fatal error", e);
 			}.bind(this),
-			'loadCity': function (city) {
+			'loadCity': function loadCity(city) {
 
 				var g_error500 = t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues');
 
@@ -270,11 +263,15 @@
 					return;
 				}
 
-				$http.get(OC.generateUrl('/apps/weather/weather/get?name=' + city.name)).
-					then(function (r) {
-						if (r.data != null) {
+				$.ajax({
+					type: "GET",
+					url: OC.generateUrl('/apps/weather/weather/get?name=' + city.name),
+					dataType: 'json'
+				})
+					.done(function loadCitySuccess(data) {
+						if (data != null) {
 							weatherApp.domCity = city;
-							weatherApp.currentCity = deepCopy(r.data);
+							weatherApp.currentCity = deepCopy(data);
 							weatherApp.selectedCityId = city.id;
 							weatherApp.currentCity.image = weatherApp.imageMapper[weatherApp.currentCity.weather[0].main];
 							weatherApp.currentCity.wind.desc = "";
@@ -309,36 +306,40 @@
 							weatherApp.cityLoadError = t('weather', 'Failed to get city weather informations. Please contact your administrator');
 						}
 						weatherApp.cityLoadNeedsAPIKey = false;
-					}.bind(this),
-						function (r) {
-							if (r.status == 404) {
-								weatherApp.cityLoadError = t('weather', 'No city with this name found.');
-								weatherApp.cityLoadNeedsAPIKey = false;
-							}
-							else if (r.status == 401) {
-								weatherApp.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
-								weatherApp.cityLoadNeedsAPIKey = true;
-							}
-							else {
-								weatherApp.cityLoadError = g_error500;
-								weatherApp.cityLoadNeedsAPIKey = false;
-							}
-						}.bind(this));
+					}.bind(this))
+					.fail(function loadCityFail(jqXHR, textStatus, errorThrown) {
+
+						if (jqXHR.status == 404) {
+							weatherApp.cityLoadError = t('weather', 'No city with this name found.');
+							weatherApp.cityLoadNeedsAPIKey = false;
+						}
+						else if (jqXHR.status == 401) {
+							weatherApp.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
+							weatherApp.cityLoadNeedsAPIKey = true;
+						}
+						else {
+							weatherApp.cityLoadError = g_error500;
+							weatherApp.cityLoadNeedsAPIKey = false;
+						}
+					}.bind(this));
 			}.bind(this),
 			'loadCities': function () {
-
-				$http.get(OC.generateUrl('/apps/weather/city/getall')).
-					then(function (r) {
-						if (!undef(r.data['cities'])) {
-							weatherApp.cities = r.data['cities'];
+				$.ajax({
+					type: "GET",
+					url: OC.generateUrl('/apps/weather/city/getall'),
+					dataType: 'json'
+				})
+					.done(function loadCitiesSuccess(data) {
+						if (!undef(data['cities'])) {
+							weatherApp.cities = data['cities'];
 						}
 
-						if (!undef(r.data['userid'])) {
-							weatherApp.userId = r.data['userid'];
+						if (!undef(data['userid'])) {
+							weatherApp.userId = data['userid'];
 						}
 
-						if (!undef(r.data['home'])) {
-							weatherApp.homeCity = r.data['home'];
+						if (!undef(data['home'])) {
+							weatherApp.homeCity = data['home'];
 							if (weatherApp.homeCity) {
 								for (var i = 0; i < weatherApp.cities.length; i++) {
 									if (weatherApp.cities[i].id == weatherApp.homeCity) {
@@ -354,10 +355,8 @@
 							weatherApp.loadCity(weatherApp.cities[0]);
 						}
 
-					}.bind(this),
-						function (r) {
-							weatherApp.fatalError();
-						}.bind(this));
+					}.bind(this))
+					.fail(function loadCitiesFail(r) { weatherApp.fatalError(); }.bind(this));
 			}.bind(this)
 		},
 		'created': function created() {
@@ -383,9 +382,8 @@
 					date.getHours() + ":" +
 					(date.getMinutes() > 9 ? "" : "0") +
 					date.getMinutes();
-
 			}
 		}
 	});
 	console.log(weatherApp);
-})();
+})(jQuery);
