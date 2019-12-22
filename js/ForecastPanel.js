@@ -1,9 +1,9 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, exports) {
+(function (window, $, WeatherApp) {
 	'use strict';
 
-	exports.ForecastPanel = new Vue({
+	WeatherApp.ForecastPanel = new Vue({
 		el: '#city-right',
 		data: function ForecastPanelData() {
 			return {
@@ -61,20 +61,32 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				},
 				cityLoadError: '',
 				cityLoadNeedsAPIKey: false,
-				metricRepresentation: '°C',
 				owncloudAppImgPath: '',
-				sharedState: exports.data
+				sharedState: WeatherApp.data
+			}
+		},
+		computed: {
+			metricRepresentation: function() {
+				if (WeatherApp.data.metric == 'kelvin') {
+					return '°K';
+				}
+				else if (WeatherApp.data.metric == 'imperial') {
+					return '°F';
+				}
+				else {
+					return '°C';
+				}
 			}
 		},
 		methods: {
 			loadCity: function loadCity(city) {
-				if (exports.utils.undef(city) || exports.utils.emptyStr(city.name)) {
-					if (!exports.utils.undef(exports.data.selectedCity.name)) {
-						city = exports.data.selectedCity;
-					} else if (!exports.utils.undef(exports.data.homeCity)) {
-						city = exports.data.homeCity;
+				if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
+					if (!WeatherApp.utils.undef(WeatherApp.data.selectedCity.name)) {
+						city = WeatherApp.data.selectedCity;
+					} else if (!WeatherApp.utils.undef(WeatherApp.data.homeCity)) {
+						city = WeatherApp.data.homeCity;
 					} else {
-						exports.ForecastPanel.cityLoadError = exports.data.g_error500;
+						this.cityLoadError = WeatherApp.data.g_error500;
 						return;
 					}
 				}
@@ -86,10 +98,10 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function loadCitySuccess(data) {
 						if (data != null) {
-							exports.ForecastPanel.currentCity = exports.utils.deepCopy(data);
-							exports.ForecastPanel.currentCity.image = exports.ForecastPanel.imageMapper[exports.ForecastPanel.currentCity.weather[0].main];
+							this.currentCity = WeatherApp.utils.deepCopy(data);
+							this.currentCity.image = this.imageMapper[this.currentCity.weather[0].main];
 
-							exports.ForecastPanel.currentCity.wind.desc = (function getWindDescription(degrees) {
+							this.currentCity.wind.desc = (function getWindDescription(degrees) {
 								if (degrees < 23) return t('weather', 'North');
 								if (degrees < 67) return t('weather', 'North-East');
 								if (degrees < 113) return t('weather', 'East');
@@ -101,44 +113,32 @@ var weatherAppGlobal = weatherAppGlobal || {};
 								if (degrees > 332) return t('weather', 'North');
 							})(data.wind.deg);
 
-							exports.ForecastPanel.cityLoadError = '';
+							this.cityLoadError = '';
 						}
 						else {
-							exports.ForecastPanel.cityLoadError = t('weather', 'Failed to get city weather informations. Please contact your administrator');
+							this.cityLoadError = t('weather', 'Failed to get city weather informations. Please contact your administrator');
 						}
-						exports.ForecastPanel.cityLoadNeedsAPIKey = false;
-					}.bind(this))
+						this.cityLoadNeedsAPIKey = false;
+					}.bind(WeatherApp.ForecastPanel))
 					.fail(function loadCityFail(jqXHR, textStatus, errorThrown) {
 
 						if (jqXHR.status == 404) {
-							exports.ForecastPanel.cityLoadError = t('weather', 'No city with this name found.');
-							exports.ForecastPanel.cityLoadNeedsAPIKey = false;
+							this.cityLoadError = t('weather', 'No city with this name found.');
+							this.cityLoadNeedsAPIKey = false;
 						}
 						else if (jqXHR.status == 401) {
-							exports.ForecastPanel.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
-							exports.ForecastPanel.cityLoadNeedsAPIKey = true;
+							this.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
+							this.cityLoadNeedsAPIKey = true;
 						}
 						else {
-							exports.ForecastPanel.cityLoadError = exports.data.g_error500;
-							exports.ForecastPanel.cityLoadNeedsAPIKey = false;
+							this.cityLoadError = WeatherApp.data.g_error500;
+							this.cityLoadNeedsAPIKey = false;
 						}
-					}.bind(this));
-			}.bind(this),
-			mapMetric: function mapMetric() {
-				if (exports.data.metric == 'kelvin') {
-					exports.ForecastPanel.metricRepresentation = '°K';
-				}
-				else if (exports.data.metric == 'imperial') {
-					exports.ForecastPanel.metricRepresentation = '°F';
-				}
-				else {
-					exports.data.metric = 'metric';
-					exports.ForecastPanel.metricRepresentation = '°C';
-				}
-			}.bind(this),
+					}.bind(WeatherApp.ForecastPanel));
+			},
 			setHome: function setHome(cityId) {
-				if (exports.utils.undef(cityId)) {
-					console.error(exports.data.g_error500);
+				if (WeatherApp.utils.undef(cityId)) {
+					console.error(WeatherApp.data.g_error500);
 					return;
 				}
 
@@ -149,30 +149,29 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function setHomeSuccess(data) {
-						if (data != null && !exports.utils.undef(data['set'])) {
-							exports.data.homeCity = { 
+						if (data != null && !WeatherApp.utils.undef(data['set'])) {
+							WeatherApp.data.homeCity = { 
 								id: cityId, 
-								name: exports.CityList.cities.find(function findCityName(city) { return city.id === cityId}).name }; // TODO set the name as well
+								name: WeatherApp.CityList.cities.find(function findCityName(city) { return city.id === cityId}).name }; // TODO set the name as well
 						}
 						else {
 							alert(t('weather', 'Failed to set home. Please contact your administrator'));
 						}
-					}.bind(this))
+					}.bind(WeatherApp.ForecastPanel))
 					.fail(function setHomeFail(r) {
-						console.error(r, exports.data.g_error500);
-					}.bind(this));
-			}.bind(this),
-
+						console.error(r, WeatherApp.data.g_error500);
+					}.bind(WeatherApp.ForecastPanel));
+			},
 		},
 		created: function ForecastPanelCreated() {
 			window.setTimeout(function () {
 				window.setInterval(function () {
-					if (exports.ForecastPanel.currentCity != null) { // TODO update cities anyway
-						exports.ForecastPanel.loadCity(exports.ForecastPanel.domCity); // todo load domcity , 
+					if (this.currentCity != null) { // TODO update cities anyway
+						this.loadCity(this.domCity); // todo load domcity , 
 					}
-				}.bind(this), 60000);
+				}.bind(WeatherApp.ForecastPanel), 60000);
 
-				exports.ForecastPanel.owncloudAppImgPath = OC.filePath('weather', 'img', '').replace('index.php/', '');
+				this.owncloudAppImgPath = OC.filePath('weather', 'img', '').replace('index.php/', '');
 			}.bind(this), 0);
 
 		},

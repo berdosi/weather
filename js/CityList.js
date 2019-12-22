@@ -1,9 +1,9 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, exports) {
+(function (window, $, WeatherApp) {
 	'use strict';
 
-	exports.CityList = new Vue({
+	WeatherApp.CityList = new Vue({
 		el: '#city-list-left .city-list',
 		data: function cityListState() {
 			return {
@@ -16,13 +16,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				addCityError: '',
 				showAddCity: false,
 
-				sharedState: exports.data
+				sharedState: WeatherApp.data
 			}
 		},
 		methods: {
 			addCity: function addCity(city) {
-				if (exports.utils.undef(city) || exports.utils.emptyStr(city.name)) {
-					exports.CityList.addCityError = t('weather', 'Empty city name!');
+				if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
+					this.addCityError = t('weather', 'Empty city name!');
 					return;
 				}
 
@@ -33,35 +33,35 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function addCitySuccess(data) {
-						if (data != null && !exports.utils.undef(data['id'])) {
-							exports.CityList.cities.push({ "name": city.name, "id": data['id'] })
-							exports.CityList.showAddCity = false;
+						if (data != null && !WeatherApp.utils.undef(data['id'])) {
+							this.cities.push({ "name": city.name, "id": data['id'] })
+							this.showAddCity = false;
 
-							if (!exports.utils.undef(data['load']) && data['load']) {
-								var loadingCity = exports.utils.deepCopy(city);
+							if (!WeatherApp.utils.undef(data['load']) && data['load']) {
+								var loadingCity = WeatherApp.utils.deepCopy(city);
 								loadingCity.id = data['id'];
-								exports.ForecastPanel.loadCity(loadingCity);
+								WeatherApp.ForecastPanel.loadCity(loadingCity);
 							}
 							city.name = "";
 						}
 						else {
-							exports.CityList.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
+							this.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
 						}
-					}.bind(this))
+					}.bind(WeatherApp.CityList))
 					.fail(function addCityFail(r, textStatus, errorThrown) {
 						if (r.status == 401) {
-							exports.CityList.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
+							this.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
 						}
 						else if (r.status == 404) {
-							exports.CityList.addCityError = t('weather', 'No city with this name found.');
+							this.addCityError = t('weather', 'No city with this name found.');
 						}
 						else if (r.status == 409) {
-							exports.CityList.addCityError = t('weather', 'This city is already registered for your account.');
+							this.addCityError = t('weather', 'This city is already registered for your account.');
 						}
 						else {
-							exports.CityList.addCityError = exports.data.g_error500;
+							this.addCityError = WeatherApp.data.g_error500;
 						}
-					}.bind(this));
+					}.bind(WeatherApp.CityList));
 			}.bind(this),
 			loadCities: function loadCities() {
 				$.ajax({
@@ -70,34 +70,34 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function loadCitiesSuccess(data) {
-						if (!exports.utils.undef(data['cities'])) {
-							exports.CityList.cities = data['cities'];
+						if (!WeatherApp.utils.undef(data['cities'])) {
+							this.cities = data['cities'];
 						}
 
-						if (!exports.utils.undef(data['home'])) {
-							exports.data.homeCity =
+						if (!WeatherApp.utils.undef(data['home'])) {
+							WeatherApp.data.homeCity =
 								data['cities'].find(function homeCityFilter(city) { return city.id == data['home'] });
 
 							// if the home city has just been deleted, select the first one instead
-							exports.data.selectedCity = exports.utils.deepCopy(
-								exports.utils.undef(exports.data.homeCity)
+							WeatherApp.data.selectedCity = WeatherApp.utils.deepCopy(
+								WeatherApp.utils.undef(WeatherApp.data.homeCity)
 									? data['cities'][0]
-									: exports.data.homeCity);
-							exports.ForecastPanel.loadCity();
+									: WeatherApp.data.homeCity);
+							WeatherApp.ForecastPanel.loadCity();
 						}
-						else if (exports.CityList.cities.length > 0) { // If no home found, load first city found
-							exports.ForecastPanel.loadCity(exports.CityList.cities[0]);
+						else if (this.cities.length > 0) { // If no home found, load first city found
+							WeatherApp.ForecastPanel.loadCity(this.cities[0]);
 						}
-					}.bind(this))
-					.fail(function loadCitiesFail(r) { exports.CityList.fatalError(); }.bind(this));
+					}.bind(WeatherApp.CityList))
+					.fail(function loadCitiesFail(r) { this.fatalError(); }.bind(WeatherApp.CityList));
 			}.bind(this),
 			loadCity: function loadCity(city) {
-				exports.data.selectedCity = city;
-				exports.ForecastPanel.loadCity(city)
+				WeatherApp.data.selectedCity = city;
+				WeatherApp.ForecastPanel.loadCity(city)
 			},
 			deleteCity: function deleteCity(city) {
-				if (exports.utils.undef(city)) {
-					console.error(exports.data.g_error500);
+				if (WeatherApp.utils.undef(city)) {
+					console.error(WeatherApp.data.g_error500);
 					return;
 				}
 
@@ -108,14 +108,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function deleteCitySuccess(data) {
-						if (data != null && !exports.utils.undef(data['deleted'])) {
-							for (var i = 0; i < exports.CityList.cities.length; i++) {
-								if (exports.CityList.cities[i].id === city.id) {
-									exports.CityList.cities.splice(i, 1);
+						if (data != null && !WeatherApp.utils.undef(data['deleted'])) {
+							for (var i = 0; i < this.cities.length; i++) {
+								if (this.cities[i].id === city.id) {
+									this.cities.splice(i, 1);
 									// If current city is the removed city, close it
-									if (exports.data.selectedCity.id === city.id) {
-										exports.data.currentCity = null;
-										exports.CityList.selectedCityId = 0;
+									if (WeatherApp.data.selectedCity.id === city.id) {
+										WeatherApp.data.currentCity = null;
+										this.selectedCityId = 0;
 									}
 									return;
 								}
@@ -124,21 +124,18 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						else {
 							alert(t('weather', 'Failed to remove city. Please contact your administrator'));
 						}
-					}.bind(this))
+					}.bind(WeatherApp.CityList))
 					.fail(function deleteCityFail(r) {
-						console.error(r, exports.data.g_error500);
-					}.bind(this));
-			}.bind(this),
+						console.error(r, WeatherApp.data.g_error500);
+					}.bind(WeatherApp.CityList));
+			},
 			fatalError: function fatalError(e) {
 				console.error("fatal error", e);
-			}.bind(this)
-
+			}
 		},
 		created: function cityListCreated() {
 			window.setTimeout(function cityListCreatedTick() {
-				// get homecity, set it to selected
-
-				exports.CityList.loadCities();
+				this.loadCities();
 			}.bind(this), 0)
 		}
 	});

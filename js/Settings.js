@@ -1,13 +1,13 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, exports) {
+(function (window, $, WeatherApp) {
 	'use strict';
 
-	exports.SettingsPanel = new Vue({
+	WeatherApp.SettingsPanel = new Vue({
 		el: '#app-settings',
 		data: function settingsPanelData() { return {
 			settingError: '',
-			sharedState: exports.data
+			sharedState: WeatherApp.data
 		}},
 		methods: {
 			loadMetric: function loadMetric() {
@@ -17,9 +17,9 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function loadMetricSuccess(data) {
-						if (!exports.utils.undef(data['metric'])) {
-							exports.data.metric = data['metric'];
-							exports.ForecastPanel.mapMetric();
+						if (!WeatherApp.utils.undef(data['metric'])) {
+							WeatherApp.data.metric = data['metric'];
+							// WeatherApp.ForecastPanel.mapMetric();
 						}
 					}.bind(this))
 					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
@@ -29,31 +29,30 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				$.ajax({
 					type: 'POST',
 					url: OC.generateUrl('/apps/weather/settings/metric/set'),
-					data: { 'metric': exports.data.metric },
+					data: { 'metric': WeatherApp.data.metric },
 					dataType: 'json'
 				})
 					.done(function modifyMetricSuccess(data) {
-						if (data != null && !exports.utils.undef(data['set'])) {
-							exports.ForecastPanel.mapMetric();
-							exports.ForecastPanel.loadCity();
+						if (data != null && !WeatherApp.utils.undef(data['set'])) {
+							WeatherApp.ForecastPanel.loadCity();
 						}
 						else {
-							exports.SettingsPanel.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
+							WeatherApp.SettingsPanel.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
 						}
 					}.bind(this))
 					.fail(function modifyMetricFail(r) {
 						if (r.status == 404) {
-							exports.SettingsPanel.settingError = t('weather', 'This metric is not known.');
+							WeatherApp.SettingsPanel.settingError = t('weather', 'This metric is not known.');
 						}
 						else {
-							exports.SettingsPanel.settingError = exports.data.g_error500;
+							WeatherApp.SettingsPanel.settingError = WeatherApp.data.g_error500;
 						}
 					}.bind(this));
 			}.bind(this)
 		},
 		created: function settingsPanelCreated() {
 			window.setTimeout(function settingsPanelCreatedTick() {
-				exports.SettingsPanel.loadMetric();
+				WeatherApp.SettingsPanel.loadMetric();
 			}.bind(this), 0)
 		}
 	});
