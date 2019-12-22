@@ -150,7 +150,9 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function setHomeSuccess(data) {
 						if (data != null && !exports.utils.undef(data['set'])) {
-							exports.data.homeCity.id = cityId; // TODO set the name as well
+							exports.data.homeCity = { 
+								id: cityId, 
+								name: exports.CityList.cities.find(function findCityName(city) { return city.id === cityId}).name }; // TODO set the name as well
 						}
 						else {
 							alert(t('weather', 'Failed to set home. Please contact your administrator'));
