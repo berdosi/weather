@@ -16,14 +16,14 @@
 				<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
 			</li>
 			<li>
-				<a href="#" v-on:click="(function(){ city.name = ''; addCityError = ''; showAddCity = true;})()"><?php p($l->t('Add a city')); ?>...</a>
+				<a href="#" v-on:click="(function(){ city.name = ''; addCityError = ''; showAddCity = !showAddCity;})()"><?php p($l->t('Add a city')); ?>...</a>
 				<div v-show="showAddCity == true" id="create-city">
 					<h1><?php p($l->t('Add city')); ?></h1>
 					<hr>
 					<h2><?php p($l->t('City name')); ?></h2>
 					<span class="city-form-error" v-show="addCityError != ''">{{ addCityError }}</span>
 					<form novalidate>
-						<input type="textbox" v-model="city.name" />
+						<input type="textbox" v-model="city.name"  v-on:keyup.enter="addCity(city)" />
 						<input type="button" value="<?php p($l->t('Add')); ?>" v-on:click="addCity(city)" />
 						<input type="button" value="<?php p($l->t('Cancel')); ?>" v-on:click="showAddCity = false" />
 					</form>
