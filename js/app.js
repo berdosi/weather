@@ -216,9 +216,9 @@
 					url: OC.generateUrl('/apps/weather/settings/metric/get'),
 					dataType: 'json'
 				})
-					.done(function loadMetricSuccess(r) {
-						if (!undef(r.data['metric'])) {
-							weatherApp.metric = r.data['metric'];
+					.done(function loadMetricSuccess(data) {
+						if (!undef(data['metric'])) {
+							weatherApp.metric = data['metric'];
 							weatherApp.mapMetric();
 						}
 					}.bind(this))
