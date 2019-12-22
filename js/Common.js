@@ -5,7 +5,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		metric: 'metric',
 		selectedCity: {},
 		homeCity: {},
-		g_error: t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues')
+		g_error500: t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues')
 	};
 
 	exports.utils = {
