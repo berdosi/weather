@@ -3,10 +3,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, exports) {
 	'use strict';
 
-	function undef(obj) {
-		return typeof obj === 'undefined' || obj === undefined;
-	}
-
 	exports.SettingsPanel = new Vue({
 		el: '#app-settings',
 		data: function settingsPanelData() { return {
@@ -21,8 +17,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function loadMetricSuccess(data) {
-						if (!undef(data['metric'])) {
-							exports.SettingsPanel.sharedState.metric = data['metric'];
+						if (!exports.utils.undef(data['metric'])) {
+							exports.data.metric = data['metric'];
 							exports.ForecastPanel.mapMetric();
 						}
 					}.bind(this))
@@ -37,7 +33,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function modifyMetricSuccess(data) {
-						if (data != null && !undef(data['set'])) {
+						if (data != null && !exports.utils.undef(data['set'])) {
 							exports.ForecastPanel.mapMetric();
 							exports.ForecastPanel.loadCity();
 						}
@@ -50,7 +46,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							exports.SettingsPanel.settingError = t('weather', 'This metric is not known.');
 						}
 						else {
-							exports.SettingsPanel.settingError = g_error500;
+							exports.SettingsPanel.settingError = exports.data.g_error500;
 						}
 					}.bind(this));
 			}.bind(this)

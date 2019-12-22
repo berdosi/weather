@@ -1,7 +1,7 @@
 <?php
 // \OCP\Util::addScript('weather', 'vue.min');
 \OCP\Util::addScript('weather', 'vue');
-\OCP\Util::addScript('weather', 'DataModel');
+\OCP\Util::addScript('weather', 'Common');
 \OCP\Util::addScript('weather', 'Settings');
 \OCP\Util::addScript('weather', 'ForecastPanel');
 \OCP\Util::addScript('weather', 'CityList');

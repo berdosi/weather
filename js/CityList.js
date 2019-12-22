@@ -3,19 +3,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, exports) {
 	'use strict';
 
-
-	function undef(obj) {
-		return typeof obj === 'undefined' || obj === undefined;
-	}
-
-	function emptyStr(obj) {
-		return undef(obj) || obj == '';
-	}
-
-	function deepCopy(obj) {
-		return JSON.parse(JSON.stringify(obj));
-	}
-
 	exports.CityList = new Vue({
 		el: '#city-list-left .city-list',
 		data: function cityListState() {
@@ -34,7 +21,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		methods: {
 			addCity: function addCity(city) {
-				if (undef(city) || emptyStr(city.name)) {
+				if (exports.utils.undef(city) || exports.utils.emptyStr(city.name)) {
 					exports.CityList.addCityError = t('weather', 'Empty city name!');
 					return;
 				}
@@ -46,12 +33,12 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function addCitySuccess(data) {
-						if (data != null && !undef(data['id'])) {
+						if (data != null && !exports.utils.undef(data['id'])) {
 							exports.CityList.cities.push({ "name": city.name, "id": data['id'] })
 							exports.CityList.showAddCity = false;
 
-							if (!undef(data['load']) && data['load']) {
-								var loadingCity = deepCopy(city);
+							if (!exports.utils.undef(data['load']) && data['load']) {
+								var loadingCity = exports.utils.deepCopy(city);
 								loadingCity.id = data['id'];
 								exports.ForecastPanel.loadCity(loadingCity);
 							}
@@ -72,7 +59,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							exports.CityList.addCityError = t('weather', 'This city is already registered for your account.');
 						}
 						else {
-							exports.CityList.addCityError = g_error500;
+							exports.CityList.addCityError = exports.data.g_error500;
 						}
 					}.bind(this));
 			}.bind(this),
@@ -83,12 +70,12 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function loadCitiesSuccess(data) {
-						if (!undef(data['cities'])) {
+						if (!exports.utils.undef(data['cities'])) {
 							exports.CityList.cities = data['cities'];
 						}
 
-						if (!undef(data['home'])) {
-							exports.CityList.sharedState.homeCity =
+						if (!exports.utils.undef(data['home'])) {
+							exports.data.homeCity =
 								data['cities'].find(function homeCityFilter(city) { return city.id == data['home'] });
 								exports.ForecastPanel.loadCity();
 						}
@@ -99,12 +86,12 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					.fail(function loadCitiesFail(r) { exports.CityList.fatalError(); }.bind(this));
 			}.bind(this),
 			loadCity: function loadCity(city) {
-				exports.CityList.sharedState.selectedCity = city;
+				exports.data.selectedCity = city;
 				exports.ForecastPanel.loadCity(city)
 			},
 			deleteCity: function deleteCity(city) {
-				if (undef(city)) {
-					console.error(g_error500);
+				if (exports.utils.undef(city)) {
+					console.error(exports.data.g_error500);
 					return;
 				}
 
@@ -115,13 +102,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function deleteCitySuccess(data) {
-						if (data != null && !undef(data['deleted'])) {
+						if (data != null && !exports.utils.undef(data['deleted'])) {
 							for (var i = 0; i < exports.CityList.cities.length; i++) {
 								if (exports.CityList.cities[i].id === city.id) {
 									exports.CityList.cities.splice(i, 1);
 									// If current city is the removed city, close it
-									if (exports.CityList.sharedState.selectedCity.id === city.id) {
-										exports.CityList.sharedState.currentCity = null;
+									if (exports.data.selectedCity.id === city.id) {
+										exports.data.currentCity = null;
 										exports.CityList.selectedCityId = 0;
 									}
 									return;
@@ -133,7 +120,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						}
 					}.bind(this))
 					.fail(function deleteCityFail(r) {
-						console.error(r, g_error500);
+						console.error(r, exports.data.g_error500);
 					}.bind(this));
 			}.bind(this),
 			fatalError: function fatalError(e) {

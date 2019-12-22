@@ -3,18 +3,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, exports) {
 	'use strict';
 
-	function undef(obj) {
-		return typeof obj === 'undefined' || obj === undefined;
-	}
-
-	function emptyStr(obj) {
-		return undef(obj) || obj == '';
-	}
-
-	function deepCopy(obj) {
-		return JSON.parse(JSON.stringify(obj));
-	}
-
 	exports.ForecastPanel = new Vue({
 		el: '#city-right',
 		data: function ForecastPanelData() {
@@ -80,16 +68,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		methods: {
 			loadCity: function loadCity(city) {
-				var g_error500 = t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues');
-
-				if (undef(city) || emptyStr(city.name)) {
-					if (!undef(exports.ForecastPanel.sharedState.selectedCity.name)) {
-						city = exports.ForecastPanel.sharedState.selectedCity;
-					} else if (!undef(exports.ForecastPanel.sharedState.homeCity)) {
-						city = exports.ForecastPanel.sharedState.homeCity;
+				if (exports.utils.undef(city) || exports.utils.emptyStr(city.name)) {
+					if (!exports.utils.undef(exports.data.selectedCity.name)) {
+						city = exports.data.selectedCity;
+					} else if (!exports.utils.undef(exports.data.homeCity)) {
+						city = exports.data.homeCity;
 					} else {
-						console.error(g_error500);
-						// alert(g_error500);
+						exports.ForecastPanel.cityLoadError = exports.data.g_error500;
 						return;
 					}
 				}
@@ -101,7 +86,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function loadCitySuccess(data) {
 						if (data != null) {
-							exports.ForecastPanel.currentCity = deepCopy(data);
+							exports.ForecastPanel.currentCity = exports.utils.deepCopy(data);
 							exports.ForecastPanel.currentCity.image = exports.ForecastPanel.imageMapper[exports.ForecastPanel.currentCity.weather[0].main];
 							exports.ForecastPanel.currentCity.wind.desc = "";
 							if (exports.ForecastPanel.currentCity.wind.deg > 0 && exports.ForecastPanel.currentCity.wind.deg < 23 ||
@@ -147,27 +132,26 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							exports.ForecastPanel.cityLoadNeedsAPIKey = true;
 						}
 						else {
-							exports.ForecastPanel.cityLoadError = g_error500;
+							exports.ForecastPanel.cityLoadError = exports.data.g_error500;
 							exports.ForecastPanel.cityLoadNeedsAPIKey = false;
 						}
 					}.bind(this));
 			}.bind(this),
 			mapMetric: function mapMetric() {
-				if (exports.ForecastPanel.sharedState.metric == 'kelvin') {
+				if (exports.data.metric == 'kelvin') {
 					exports.ForecastPanel.metricRepresentation = '°K';
 				}
-				else if (exports.ForecastPanel.sharedState.metric == 'imperial') {
+				else if (exports.data.metric == 'imperial') {
 					exports.ForecastPanel.metricRepresentation = '°F';
 				}
 				else {
-					exports.ForecastPanel.sharedState.metric = 'metric';
+					exports.data.metric = 'metric';
 					exports.ForecastPanel.metricRepresentation = '°C';
 				}
 			}.bind(this),
 			setHome: function setHome(cityId) {
-				if (undef(cityId)) {
-					console.error(g_error500);
-					// alert(g_error500);
+				if (exports.utils.undef(cityId)) {
+					console.error(exports.data.g_error500);
 					return;
 				}
 
@@ -178,16 +162,15 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function setHomeSuccess(data) {
-						if (data != null && !undef(data['set'])) {
-							exports.ForecastPanel.sharedState.homeCity.id = cityId; // TODO set the name as well
+						if (data != null && !exports.utils.undef(data['set'])) {
+							exports.data.homeCity.id = cityId; // TODO set the name as well
 						}
 						else {
 							alert(t('weather', 'Failed to set home. Please contact your administrator'));
 						}
 					}.bind(this))
 					.fail(function setHomeFail(r) {
-						console.error(r, g_error500);
-						// alert(g_error500);
+						console.error(r, exports.data.g_error500);
 					}.bind(this));
 			}.bind(this),
 
@@ -195,15 +178,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		created: function ForecastPanelCreated() {
 			window.setTimeout(function () {
 				window.setInterval(function () {
-					if (exports.ForecastPanel.currentCity != null) {
+					if (exports.ForecastPanel.currentCity != null) { // TODO update cities anyway
 						exports.ForecastPanel.loadCity(exports.ForecastPanel.domCity); // todo load domcity , 
 					}
 				}.bind(this), 60000);
 
 				exports.ForecastPanel.owncloudAppImgPath = OC.filePath('weather', 'img', '').replace('index.php/', '');
-				// weatherApp.loadCities();
-				// weatherApp.loadMetric();
-			}.bind(this), 0)
+			}.bind(this), 0);
+
 		},
 		filters: {
 			date: function formatDate(rawValue, formatString) {
