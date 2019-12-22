@@ -3,7 +3,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, WeatherApp, Vue) {
 	'use strict';
 
-	Vue.component("forecast-city-panel", {
+	Vue.component("forecast-city-weather-panel", {
 		props: {
 			name: { type: String, default: '' },
 			cityId: { type: String, default: '' },
@@ -24,7 +24,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		data: function forecastCityPanelData() {
 			return {
-
 			}
 		},
 		methods: {
