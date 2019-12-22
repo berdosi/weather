@@ -7,8 +7,11 @@
  * @author Loic Blot <loic.blot@unix-experience.fr>
  * @copyright Loic Blot 2014-2015
  */
-(function WeatherApp($) {
 
+var weatherAppGlobal = weatherAppGlobal || {};
+
+(function WeatherAppMain(window, $, exports) {
+	
 	function undef(obj) {
 		return typeof obj === 'undefined' || obj === undefined;
 	}
@@ -25,8 +28,10 @@
 		'el': '#app',
 		'data': function () {
 			return {
+				'item': 0,
+				'list': [],
 				'city': {
-					'name': ''
+					'name': '',
 				},
 				'cities': [],
 				'userId': '',
@@ -386,4 +391,4 @@
 		}
 	});
 	console.log(weatherApp);
-})(jQuery);
+})(window, jQuery, weatherAppGlobal);
