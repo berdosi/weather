@@ -77,7 +77,12 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						if (!exports.utils.undef(data['home'])) {
 							exports.data.homeCity =
 								data['cities'].find(function homeCityFilter(city) { return city.id == data['home'] });
-							exports.data.selectedCity = exports.utils.deepCopy(exports.data.homeCity);
+
+							// if the home city has just been deleted, select the first one instead
+							exports.data.selectedCity = exports.utils.deepCopy(
+								exports.utils.undef(exports.data.homeCity)
+									? data['cities'][0]
+									: exports.data.homeCity);
 							exports.ForecastPanel.loadCity();
 						}
 						else if (exports.CityList.cities.length > 0) { // If no home found, load first city found
