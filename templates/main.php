@@ -103,7 +103,6 @@
 			:humidity="currentCity.main.humidity | number"
 			:description="currentCity.weather[0].description"
 			:wind-speed="currentCity.wind.speed | number"
-			:wind-description="currentCity.wind.desc"
 			:sunrise="currentCity.sys.sunrise"
 			:sunset="currentCity.sys.sunset"
 			:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"

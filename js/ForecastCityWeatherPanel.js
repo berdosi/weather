@@ -17,7 +17,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			humidity: { type: Number, default: 0 },
 			description: { type: String, default: '' },
 			windSpeed: { type: Number, default: 0 },
-			windDescription: { type: String, default: '' },
 			sunrise: { type: Number, default: 0 },
 			sunset: { type: Number, default: 0 },
 			toShow: { type: Boolean, default: false },
@@ -51,17 +50,18 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					}.bind(WeatherApp.ForecastPanel));
 			}
 		},
+		mixins: [WeatherApp.mixins.hasMetricRepresentation],
 		computed: {
-			metricRepresentation: function () {
-				if (WeatherApp.data.metric == 'kelvin') {
-					return '°K';
-				}
-				else if (WeatherApp.data.metric == 'imperial') {
-					return '°F';
-				}
-				else {
-					return '°C';
-				}
+			windDescription: function getWindDescription(degrees) {
+				if (degrees < 23) return t('weather', 'North');
+				if (degrees < 67) return t('weather', 'North-East');
+				if (degrees < 113) return t('weather', 'East');
+				if (degrees < 157) return t('weather', 'South-East');
+				if (degrees < 201) return t('weather', 'South');
+				if (degrees < 245) return t('weather', 'South-West');
+				if (degrees < 289) return t('weather', 'West');
+				if (degrees < 333) return t('weather', 'North-West');
+				if (degrees > 332) return t('weather', 'North');
 			}
 		},
 		filters: {

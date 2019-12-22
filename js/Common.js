@@ -1,6 +1,6 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function WeatherAppCommon(window, $, WeatherApp) {
+(function WeatherAppCommon(window, $, WeatherApp, Vue) {
 	WeatherApp.data = {
 		metric: 'metric',
 		selectedCity: {},
@@ -20,4 +20,22 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		}
 	}
 
-})(window, jQuery, weatherAppGlobal)
+	WeatherApp.mixins = {
+		hasMetricRepresentation: {
+			computed: {
+				metricRepresentation: function () {
+					if (WeatherApp.data.metric == 'kelvin') {
+						return '°K';
+					}
+					else if (WeatherApp.data.metric == 'imperial') {
+						return '°F';
+					}
+					else {
+						return '°C';
+					}
+				}
+			}
+		}
+	}
+
+})(window, jQuery, weatherAppGlobal, Vue)

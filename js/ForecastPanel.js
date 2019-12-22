@@ -65,19 +65,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				sharedState: WeatherApp.data
 			}
 		},
-		computed: {
-			metricRepresentation: function() {
-				if (WeatherApp.data.metric == 'kelvin') {
-					return '°K';
-				}
-				else if (WeatherApp.data.metric == 'imperial') {
-					return '°F';
-				}
-				else {
-					return '°C';
-				}
-			}
-		},
 		methods: {
 			loadCity: function loadCity(city) {
 				if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
@@ -100,19 +87,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						if (data != null) {
 							this.currentCity = WeatherApp.utils.deepCopy(data);
 							this.currentCity.image = this.imageMapper[this.currentCity.weather[0].main];
-
-							this.currentCity.wind.desc = (function getWindDescription(degrees) {
-								if (degrees < 23) return t('weather', 'North');
-								if (degrees < 67) return t('weather', 'North-East');
-								if (degrees < 113) return t('weather', 'East');
-								if (degrees < 157) return t('weather', 'South-East');
-								if (degrees < 201) return t('weather', 'South');
-								if (degrees < 245) return t('weather', 'South-West');
-								if (degrees < 289) return t('weather', 'West');
-								if (degrees < 333) return t('weather', 'North-West');
-								if (degrees > 332) return t('weather', 'North');
-							})(data.wind.deg);
-
 							this.cityLoadError = '';
 						}
 						else {
@@ -150,14 +124,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 
 		},
 		filters: {
-			date: function formatDate(rawValue, formatString) {
-				if (formatString !== "HH:mm") throw "Unrecognized format: " + formatString;
-				const date = new Date(rawValue);
-				return (date.getHours() > 9 ? "" : "0") +
-					date.getHours() + ":" +
-					(date.getMinutes() > 9 ? "" : "0") +
-					date.getMinutes();
-			},
 			number: function numberFilter(rawValue) { return parseFloat(rawValue) }
 		}
 	});
