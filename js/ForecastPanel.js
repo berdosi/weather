@@ -136,32 +136,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						}
 					}.bind(WeatherApp.ForecastPanel));
 			},
-			setHome: function setHome(cityId) {
-				if (WeatherApp.utils.undef(cityId)) {
-					console.error(WeatherApp.data.g_error500);
-					return;
-				}
-
-				$.ajax({
-					type: 'POST',
-					url: OC.generateUrl('/apps/weather/settings/home/set'),
-					data: { 'city': cityId },
-					dataType: 'json'
-				})
-					.done(function setHomeSuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['set'])) {
-							WeatherApp.data.homeCity = { 
-								id: cityId, 
-								name: WeatherApp.CityList.cities.find(function findCityName(city) { return city.id === cityId}).name }; // TODO set the name as well
-						}
-						else {
-							alert(t('weather', 'Failed to set home. Please contact your administrator'));
-						}
-					}.bind(WeatherApp.ForecastPanel))
-					.fail(function setHomeFail(r) {
-						console.error(r, WeatherApp.data.g_error500);
-					}.bind(WeatherApp.ForecastPanel));
-			},
 		},
 		created: function ForecastPanelCreated() {
 			window.setTimeout(function () {

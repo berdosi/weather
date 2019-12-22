@@ -22,10 +22,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			sunset: { type: Number, default: 0 },
 			toShow: { type: Boolean, default: false },
 		},
-		data: function forecastCityPanelData() {
-			return {
-			}
-		},
 		methods: {
 			setHome: function setHome(cityId) {
 				if (WeatherApp.utils.undef(cityId)) {

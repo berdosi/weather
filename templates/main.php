@@ -4,6 +4,7 @@
 \OCP\Util::addScript('weather', 'Common');
 \OCP\Util::addScript('weather', 'Settings');
 \OCP\Util::addScript('weather', 'ForecastCityWeatherPanel');
+\OCP\Util::addScript('weather', 'ForecastCityForecastPanel');
 \OCP\Util::addScript('weather', 'ForecastPanel');
 \OCP\Util::addScript('weather', 'CityList');
 \OCP\Util::addStyle('weather', 'style');
@@ -25,7 +26,32 @@
 			<div class="city-current-sunrise"><?php p($l->t('Sunrise')); ?>: {{ sunrise * 1000 | date('HH:mm') }} <?php p($l->t('Sunset')); ?>: {{ sunset * 1000  | date('HH:mm') }}</div>
 		</div>
 	</script>
-		
+	<script type="text/x-template" id="forecast-forecast-panel-template">
+		<div id="city-forecast-panel" v-show="toShow" >
+			<table>
+				<thead>
+					<tr>
+						<th><?php p($l->t('Date')); ?></th>
+						<th><?php p($l->t('Temperature')); ?></th>
+						<th><?php p($l->t('Weather')); ?></th>
+						<th><?php p($l->t('Pressure')); ?></th>
+						<th><?php p($l->t('Humidity')); ?></th>
+						<th><?php p($l->t('Wind')); ?></th>
+					</tr>
+				</thead>
+				<tbody v-if="forecastItems.length > 0">
+					<tr v-for="forecast in forecastItems" :key="forecast.date">
+						<td>{{ forecast.date }}</td>
+						<td>{{ forecast.temperature }}{{ metricRepresentation }}</td>
+						<td>{{ forecast.weather }}</td>
+						<td>{{ forecast.pressure }} hpa</td>
+						<td>{{ forecast.humidity }} %</td>
+						<td>{{ forecast.wind.speed }} m/s - {{ forecast.wind.desc }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</script>
 	<div id="city-list-left">
 		<ul class="city-list">
 			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == sharedState.selectedCity.id }]" :key="city.id">
@@ -82,29 +108,10 @@
 			:sunset="currentCity.sys.sunset"
 			:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"
 		></forecast-city-weather-panel>
-		<div id="city-forecast-panel" v-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined" >
-			<table>
-				<thead>
-					<tr>
-						<th><?php p($l->t('Date')); ?></th>
-						<th><?php p($l->t('Temperature')); ?></th>
-						<th><?php p($l->t('Weather')); ?></th>
-						<th><?php p($l->t('Pressure')); ?></th>
-						<th><?php p($l->t('Humidity')); ?></th>
-						<th><?php p($l->t('Wind')); ?></th>
-					</tr>
-				</thead>
-				<tbody v-if="currentCity.forecast.length > 0">
-					<tr v-for="forecast in currentCity.forecast" :key="forecast.date">
-						<td>{{ forecast.date }}</td>
-						<td>{{ forecast.temperature }}{{ metricRepresentation }}</td>
-						<td>{{ forecast.weather }}</td>
-						<td>{{ forecast.pressure }} hpa</td>
-						<td>{{ forecast.humidity }} %</td>
-						<td>{{ forecast.wind.speed }} m/s - {{ forecast.wind.desc }}</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
+		<forecast-city-forecast-panel
+			:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"
+			:forecast-items="currentCity.forecast"
+		></forecast-city-forecast-panel>
+
 	</div>
 </div>
