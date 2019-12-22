@@ -1,14 +1,17 @@
 <?php
 // \OCP\Util::addScript('weather', 'vue.min');
 \OCP\Util::addScript('weather', 'vue');
-\OCP\Util::addScript('weather', 'app');
+\OCP\Util::addScript('weather', 'DataModel');
+\OCP\Util::addScript('weather', 'Settings');
+\OCP\Util::addScript('weather', 'ForecastPanel');
+\OCP\Util::addScript('weather', 'CityList');
 \OCP\Util::addStyle('weather', 'style');
 ?>
 
 <div id="app">
 	<div id="city-list-left">
 		<ul class="city-list">
-			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == selectedCityId }]">
+			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == sharedState.selectedCity.id }]">
 				<a href="#" v-on:click="loadCity(city)">{{ city.name }}</a>
 				<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
 			</li>
@@ -33,7 +36,7 @@
 			</div>
 			<div style="display: none;" id="app-settings-content">
 				<h2><?php p($l->t('Metric')); ?></h2>
-				<select name="metric" v-on:change="modifyMetric()" v-model="metric">
+				<select name="metric" v-on:change="modifyMetric()" v-model="sharedState.metric">
 					<option value="metric">°C</option>
 					<option value="kelvin">°K</option>
 					<option value="imperial">°F</option>
@@ -41,18 +44,16 @@
 			</div>
 		</div>
 	</div>
-	<div id="city-right" v-show="cityLoadError != ''">
-		<span class="city-load-error">
+	<div id="city-right" :style="{ backgroundImage: 'url(' + owncloudAppImgPath + currentCity.image + ')' }">
+		<span class="city-load-error" v-show="cityLoadError != ''">
 			{{ cityLoadError }}<br /><br />
 			<a href="http://home.openweathermap.org/users/sign_in" v-show="cityLoadNeedsAPIKey == true"><?php p($l->t('Click here to get an API key')); ?></a>
 		</span>
-	</div>
-	<div id="city-right" v-show="cityLoadError == '' && currentCity != null" :style="{ backgroundImage: 'url(' + owncloudAppImgPath + currentCity.image + ')' }">
-		<div id="city-weather-panel">
+		<div id="city-weather-panel" v-show="cityLoadError == '' && currentCity != null" >
 			<div class="city-name">
 				{{ currentCity.name }}, {{ currentCity.sys.country }}
-				<img v-show="selectedCityId == homeCity" :src="owncloudAppImgPath + 'home-pick.png'" />
-				<img class="home-icon" v-on:click="setHome(selectedCityId)" v-show="selectedCityId != homeCity" :src="owncloudAppImgPath + 'home-nopick.png'" />
+				<img v-show="sharedState.selectedCity.id == sharedState.homeCity.id" :src="owncloudAppImgPath + 'home-pick.png'" />
+				<img class="home-icon" v-on:click="setHome(sharedState.selectedCity.id)" v-show="sharedState.selectedCity.id != sharedState.homeCity.id" :src="owncloudAppImgPath + 'home-nopick.png'" />
 			</div>
 			<div class="city-current-temp">{{ currentCity.main.temp }}{{ metricRepresentation }}</div>
 			<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ currentCity.main.pressure }} hpa</div>
@@ -61,7 +62,7 @@
 			<div class="city-current-wind"><?php p($l->t('Wind')); ?>: {{ currentCity.wind.speed }} m/s - {{ currentCity.wind.desc }}</div>
 			<div class="city-current-sunrise"><?php p($l->t('Sunrise')); ?>: {{ currentCity.sys.sunrise * 1000 | date('HH:mm') }} <?php p($l->t('Sunset')); ?>: {{ currentCity.sys.sunset * 1000  | date('HH:mm') }}</div>
 		</div>
-		<div id="city-forecast-panel">
+		<div id="city-forecast-panel" v-show="cityLoadError == '' && currentCity != null" >
 			<table>
 				<thead>
 					<tr>
