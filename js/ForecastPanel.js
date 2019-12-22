@@ -183,7 +183,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					date.getHours() + ":" +
 					(date.getMinutes() > 9 ? "" : "0") +
 					date.getMinutes();
-			}
+			},
+			number: function numberFilter(rawValue) { return parseFloat(rawValue) }
 		}
 	});
 })(window, jQuery, weatherAppGlobal);

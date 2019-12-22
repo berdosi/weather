@@ -3,6 +3,7 @@
 \OCP\Util::addScript('weather', 'vue');
 \OCP\Util::addScript('weather', 'Common');
 \OCP\Util::addScript('weather', 'Settings');
+\OCP\Util::addScript('weather', 'ForecastCityPanel');
 \OCP\Util::addScript('weather', 'ForecastPanel');
 \OCP\Util::addScript('weather', 'CityList');
 \OCP\Util::addStyle('weather', 'style');
@@ -49,20 +50,38 @@
 			{{ cityLoadError }}<br /><br />
 			<a href="http://home.openweathermap.org/users/sign_in" v-show="cityLoadNeedsAPIKey == true"><?php p($l->t('Click here to get an API key')); ?></a>
 		</span>
-		<div id="city-weather-panel" v-show="cityLoadError == '' && currentCity != null" >
-			<div class="city-name">
-				{{ currentCity.name }}, {{ currentCity.sys.country }}
-				<img v-show="sharedState.selectedCity.id == (sharedState.homeCity || {}).id" :src="owncloudAppImgPath + 'home-pick.png'" />
-				<img class="home-icon" v-on:click="setHome(sharedState.selectedCity.id)" v-show="sharedState.selectedCity.id != (sharedState.homeCity || {}).id" :src="owncloudAppImgPath + 'home-nopick.png'" />
+		<script type="text/x-template" id="forecast-city-panel-template">
+			<div id="city-weather-panel" v-show="toShow" >
+				<div class="city-name">
+					{{ name }}, {{ country }}
+					<img v-show="isHomeCity" :src="owncloudAppImgPath + 'home-pick.png'" />
+					<img class="home-icon" v-on:click="setHome(selectedCityId)" v-show="!isHomeCity" :src="owncloudAppImgPath + 'home-nopick.png'" />
+				</div>
+				<div class="city-current-temp">{{ temp }}{{ metricRepresentation }}</div>
+				<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ pressure }} hpa</div>
+				<div class="city-current-humidity"><?php p($l->t('Humidity')); ?>: {{ humidity}}%</div>
+				<div class="city-current-weather"><?php p($l->t('Cloudiness')); ?>: {{description }}</div>
+				<div class="city-current-wind"><?php p($l->t('Wind')); ?>: {{ windSpeed }} m/s - {{ windDescription }}</div>
+				<div class="city-current-sunrise"><?php p($l->t('Sunrise')); ?>: {{ sunrise * 1000 | date('HH:mm') }} <?php p($l->t('Sunset')); ?>: {{ sunset * 1000  | date('HH:mm') }}</div>
 			</div>
-			<div class="city-current-temp">{{ currentCity.main.temp }}{{ metricRepresentation }}</div>
-			<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ currentCity.main.pressure }} hpa</div>
-			<div class="city-current-humidity"><?php p($l->t('Humidity')); ?>: {{ currentCity.main.humidity}}%</div>
-			<div class="city-current-weather"><?php p($l->t('Cloudiness')); ?>: {{ currentCity.weather[0].description }}</div>
-			<div class="city-current-wind"><?php p($l->t('Wind')); ?>: {{ currentCity.wind.speed }} m/s - {{ currentCity.wind.desc }}</div>
-			<div class="city-current-sunrise"><?php p($l->t('Sunrise')); ?>: {{ currentCity.sys.sunrise * 1000 | date('HH:mm') }} <?php p($l->t('Sunset')); ?>: {{ currentCity.sys.sunset * 1000  | date('HH:mm') }}</div>
-		</div>
-		<div id="city-forecast-panel" v-show="cityLoadError == '' && currentCity != null" >
+		</script>
+		<forecast-city-panel
+			:name="currentCity.name"
+			:selected-city-id="sharedState.selectedCity.id"
+			:country="currentCity.country"
+			:is-home-city="sharedState.selectedCity.id == (sharedState.homeCity || {}).id"
+			:owncloud-app-img-path="owncloudAppImgPath"
+			:temp="currentCity.main.temp | number"
+			:pressure="currentCity.main.pressure | number"
+			:humidity="currentCity.main.humidity | number"
+			:description="currentCity.weather[0].description"
+			:wind-speed="currentCity.wind.speed | number"
+			:wind-description="currentCity.wind.desc"
+			:sunrise="currentCity.sys.sunrise"
+			:sunset="currentCity.sys.sunset"
+			:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"
+		></forecast-city-panel>
+		<div id="city-forecast-panel" v-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined" >
 			<table>
 				<thead>
 					<tr>
