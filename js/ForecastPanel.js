@@ -88,32 +88,19 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						if (data != null) {
 							exports.ForecastPanel.currentCity = exports.utils.deepCopy(data);
 							exports.ForecastPanel.currentCity.image = exports.ForecastPanel.imageMapper[exports.ForecastPanel.currentCity.weather[0].main];
-							exports.ForecastPanel.currentCity.wind.desc = "";
-							if (exports.ForecastPanel.currentCity.wind.deg > 0 && exports.ForecastPanel.currentCity.wind.deg < 23 ||
-								exports.ForecastPanel.currentCity.wind.deg > 333) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'North');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 22 && exports.ForecastPanel.currentCity.wind.deg < 67) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'North-East');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 66 && exports.ForecastPanel.currentCity.wind.deg < 113) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'East');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 112 && exports.ForecastPanel.currentCity.wind.deg < 157) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'South-East');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 156 && exports.ForecastPanel.currentCity.wind.deg < 201) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'South');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 200 && exports.ForecastPanel.currentCity.wind.deg < 245) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'South-West');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 244 && exports.ForecastPanel.currentCity.wind.deg < 289) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'West');
-							}
-							else if (exports.ForecastPanel.currentCity.wind.deg > 288) {
-								exports.ForecastPanel.currentCity.wind.desc = t('weather', 'North-West');
-							}
+
+							exports.ForecastPanel.currentCity.wind.desc = (function getWindDescription(degrees) {
+								if (degrees < 23) return t('weather', 'North');
+								if (degrees < 67) return t('weather', 'North-East');
+								if (degrees < 113) return t('weather', 'East');
+								if (degrees < 157) return t('weather', 'South-East');
+								if (degrees < 201) return t('weather', 'South');
+								if (degrees < 245) return t('weather', 'South-West');
+								if (degrees < 289) return t('weather', 'West');
+								if (degrees < 333) return t('weather', 'North-West');
+								if (degrees > 332) return t('weather', 'North');
+							})(data.wind.deg);
+
 							exports.ForecastPanel.cityLoadError = '';
 						}
 						else {
