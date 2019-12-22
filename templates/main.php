@@ -52,8 +52,8 @@
 		<div id="city-weather-panel" v-show="cityLoadError == '' && currentCity != null" >
 			<div class="city-name">
 				{{ currentCity.name }}, {{ currentCity.sys.country }}
-				<img v-show="sharedState.selectedCity.id == sharedState.homeCity.id" :src="owncloudAppImgPath + 'home-pick.png'" />
-				<img class="home-icon" v-on:click="setHome(sharedState.selectedCity.id)" v-show="sharedState.selectedCity.id != sharedState.homeCity.id" :src="owncloudAppImgPath + 'home-nopick.png'" />
+				<img v-show="sharedState.selectedCity.id == (sharedState.homeCity || {}).id" :src="owncloudAppImgPath + 'home-pick.png'" />
+				<img class="home-icon" v-on:click="setHome(sharedState.selectedCity.id)" v-show="sharedState.selectedCity.id != (sharedState.homeCity || {}).id" :src="owncloudAppImgPath + 'home-nopick.png'" />
 			</div>
 			<div class="city-current-temp">{{ currentCity.main.temp }}{{ metricRepresentation }}</div>
 			<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ currentCity.main.pressure }} hpa</div>
