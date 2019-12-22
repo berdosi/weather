@@ -11,7 +11,7 @@
 <div id="app">
 	<div id="city-list-left">
 		<ul class="city-list">
-			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == sharedState.selectedCity.id }]">
+			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == sharedState.selectedCity.id }]" :key="city.id">
 				<a href="#" v-on:click="loadCity(city)">{{ city.name }}</a>
 				<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
 			</li>
@@ -75,7 +75,7 @@
 					</tr>
 				</thead>
 				<tbody v-if="currentCity.forecast.length > 0">
-					<tr v-for="forecast in currentCity.forecast">
+					<tr v-for="forecast in currentCity.forecast" :key="forecast.date">
 						<td>{{ forecast.date }}</td>
 						<td>{{ forecast.temperature }}{{ metricRepresentation }}</td>
 						<td>{{ forecast.weather }}</td>
