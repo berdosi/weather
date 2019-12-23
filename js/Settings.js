@@ -1,14 +1,17 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp) {
+(function (window, $, WeatherApp, Vue) {
 	'use strict';
 
-	WeatherApp.SettingsPanel = new Vue({
-		el: '#app-settings',
-		data: function settingsPanelData() { return {
-			settingError: '',
-			sharedState: WeatherApp.data
-		}},
+	WeatherApp.SettingsPanel = Vue.component("settings-panel", {
+		// el: '#app-settings',
+		template: "#settings-panel-template",
+		data: function settingsPanelData() {
+			return {
+				settingError: '',
+				sharedState: WeatherApp.data
+			}
+		},
 		methods: {
 			loadMetric: function loadMetric() {
 				$.ajax({
@@ -19,13 +22,11 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					.done(function loadMetricSuccess(data) {
 						if (!WeatherApp.utils.undef(data['metric'])) {
 							WeatherApp.data.metric = data['metric'];
-							// WeatherApp.ForecastPanel.mapMetric();
 						}
 					}.bind(this))
 					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
 			}.bind(this),
 			modifyMetric: function modifyMetric() {
-		
 				$.ajax({
 					type: 'POST',
 					url: OC.generateUrl('/apps/weather/settings/metric/set'),
@@ -34,7 +35,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function modifyMetricSuccess(data) {
 						if (data != null && !WeatherApp.utils.undef(data['set'])) {
-							WeatherApp.ForecastPanel.loadCity();
+							this.$root.$refs["forecast-panel"].loadCity();
 						}
 						else {
 							WeatherApp.SettingsPanel.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
@@ -48,13 +49,11 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							WeatherApp.SettingsPanel.settingError = WeatherApp.data.g_error500;
 						}
 					}.bind(this));
-			}.bind(this)
+			}
 		},
 		created: function settingsPanelCreated() {
-			window.setTimeout(function settingsPanelCreatedTick() {
-				WeatherApp.SettingsPanel.loadMetric();
-			}.bind(this), 0)
+			this.loadMetric();
 		}
 	});
 
-})(window, jQuery, weatherAppGlobal);
+})(window, jQuery, weatherAppGlobal, Vue);

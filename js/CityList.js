@@ -3,8 +3,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, WeatherApp) {
 	'use strict';
 
-	WeatherApp.CityList = new Vue({
-		el: '#city-list-left .city-list',
+	WeatherApp.CityList = Vue.component("city-list", {
+		template: "#city-list-template",
 		data: function cityListState() {
 			return {
 				item: 0,
@@ -47,7 +47,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						else {
 							this.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
 						}
-					}.bind(WeatherApp.CityList))
+					}.bind(this))
 					.fail(function addCityFail(r, textStatus, errorThrown) {
 						if (r.status == 401) {
 							this.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
@@ -61,8 +61,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						else {
 							this.addCityError = WeatherApp.data.g_error500;
 						}
-					}.bind(WeatherApp.CityList));
-			}.bind(this),
+					}.bind(this));
+			},
 			loadCities: function loadCities() {
 				$.ajax({
 					type: "GET",
@@ -83,17 +83,17 @@ var weatherAppGlobal = weatherAppGlobal || {};
 								WeatherApp.utils.undef(WeatherApp.data.homeCity)
 									? data['cities'][0]
 									: WeatherApp.data.homeCity);
-							WeatherApp.ForecastPanel.loadCity();
+							this.loadCity(WeatherApp.data.selectedCity);
 						}
 						else if (this.cities.length > 0) { // If no home found, load first city found
-							WeatherApp.ForecastPanel.loadCity(this.cities[0]);
+							this.loadCity(this.cities[0]);
 						}
-					}.bind(WeatherApp.CityList))
-					.fail(function loadCitiesFail(r) { this.fatalError(); }.bind(WeatherApp.CityList));
-			}.bind(this),
+					}.bind(this))
+					.fail(function loadCitiesFail(r) { this.fatalError(); }.bind(this));
+			},
 			loadCity: function loadCity(city) {
 				WeatherApp.data.selectedCity = city;
-				WeatherApp.ForecastPanel.loadCity(city)
+				this.$root.$refs["forecast-panel"].loadCity(city);
 			},
 			deleteCity: function deleteCity(city) {
 				if (WeatherApp.utils.undef(city)) {
@@ -124,19 +124,17 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						else {
 							alert(t('weather', 'Failed to remove city. Please contact your administrator'));
 						}
-					}.bind(WeatherApp.CityList))
+					}.bind(this))
 					.fail(function deleteCityFail(r) {
 						console.error(r, WeatherApp.data.g_error500);
-					}.bind(WeatherApp.CityList));
+					}.bind(this));
 			},
 			fatalError: function fatalError(e) {
 				console.error("fatal error", e);
 			}
 		},
 		created: function cityListCreated() {
-			window.setTimeout(function cityListCreatedTick() {
-				this.loadCities();
-			}.bind(this), 0)
+			this.loadCities();
 		}
 	});
 })(window, jQuery, weatherAppGlobal);

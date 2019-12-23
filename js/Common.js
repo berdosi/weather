@@ -35,7 +35,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					}
 				}
 			}
+		},
+		hasOwncloudAppImgPath: {
+			data: function () {
+				return {
+					owncloudAppImgPath: OC.filePath('weather', 'img', '').replace('index.php/', '')
+				}
+			}
 		}
 	}
-
 })(window, jQuery, weatherAppGlobal, Vue)
