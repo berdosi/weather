@@ -6,11 +6,5 @@ var weatherAppGlobal = weatherAppGlobal || {};
 	Vue.component("left-panel",
 		{
 			template: "#left-panel-template",
-			data: function leftPanelData() {
-				return {
-
-				}
-			}
-
 		})
 })(window, jQuery, weatherAppGlobal, Vue)

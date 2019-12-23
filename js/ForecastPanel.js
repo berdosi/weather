@@ -116,20 +116,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				},
 			},
 			created: function ForecastPanelCreated() {
-				window.setTimeout(function () {
-					window.setInterval(function () {
-						if (this.currentCity != null) { // TODO update cities anyway
-							this.loadCity(this.domCity); // todo load domcity , 
-						}
-					}.bind(this), 60000);
-				}.bind(this), 0);
-				// this.loadCity();
+				window.setInterval(function () {
+					if (this.currentCity != null) { // TODO update cities anyway
+						this.loadCity(this.domCity); // todo load domcity , 
+					}
+				}.bind(this), 60000);
 			},
 			mounted: function() {
 				this.loadCity();
-			},
-			filters: {
-				number: function numberFilter(rawValue) { return parseFloat(rawValue) }
 			}
 		});
 })(window, jQuery, weatherAppGlobal, Vue);

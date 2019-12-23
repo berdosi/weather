@@ -62,8 +62,8 @@
 		</div>
 		<div class="city-current-temp">{{ temp }}{{ metricRepresentation }}</div>
 		<div class="city-current-pressure"><?php p($l->t('Pressure')); ?>: {{ pressure }} hpa</div>
-		<div class="city-current-humidity"><?php p($l->t('Humidity')); ?>: {{ humidity}}%</div>
-		<div class="city-current-weather"><?php p($l->t('Cloudiness')); ?>: {{description }}</div>
+		<div class="city-current-humidity"><?php p($l->t('Humidity')); ?>: {{ humidity }}%</div>
+		<div class="city-current-weather"><?php p($l->t('Cloudiness')); ?>: {{ description }}</div>
 		<div class="city-current-wind"><?php p($l->t('Wind')); ?>: {{ windSpeed }} m/s - {{ windDescription }}</div>
 		<div class="city-current-sunrise"><?php p($l->t('Sunrise')); ?>: {{ sunrise * 1000 | date('HH:mm') }} <?php p($l->t('Sunset')); ?>: {{ sunset * 1000  | date('HH:mm') }}</div>
 	</div>

@@ -5,11 +5,10 @@ var weatherAppGlobal = weatherAppGlobal || {};
 
 	Vue.component("forecast-city-weather-panel", {
 		props: {
-			currentCity: { type: Object, default: function(){ return {
-				} } },
+			currentCity: { type: Object, default: function () { return {} } },
 			toShow: { type: Boolean, default: false }
 		},
-		data: function() {
+		data: function () {
 			return {
 				sharedState: WeatherApp.data
 			}
