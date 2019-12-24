@@ -13,6 +13,9 @@ var weatherAppGlobal = weatherAppGlobal || {};
 	WeatherApp.setHomeCity = function setHomeCity(city) {
 		WeatherApp.data.homeCity = city;
 	}
+	WeatherApp.setMetric = function setMetric(metric) {
+		WeatherApp.data.metric = metric;
+	}
 
 
 	WeatherApp.utils = {
@@ -31,10 +34,10 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		hasMetricRepresentation: {
 			computed: {
 				metricRepresentation: function () {
-					if (WeatherApp.data.metric == 'kelvin') {
+					if (this.metric == 'kelvin') {
 						return '°K';
 					}
-					else if (WeatherApp.data.metric == 'imperial') {
+					else if (this.metric == 'imperial') {
 						return '°F';
 					}
 					else {

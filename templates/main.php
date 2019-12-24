@@ -40,7 +40,7 @@
 		</div>
 		<div style="display: none;" id="app-settings-content">
 			<h2><?php p($l->t('Metric')); ?></h2>
-			<select name="metric" v-on:change="modifyMetric()" v-model="sharedState.metric">
+			<select name="metric" v-on:change="modifyMetric()" v-model="metric">
 				<option value="metric">°C</option>
 				<option value="kelvin">°K</option>
 				<option value="imperial">°F</option>
@@ -101,14 +101,16 @@
 				<a href="http://home.openweathermap.org/users/sign_in" v-show="cityLoadNeedsAPIKey == true"><?php p($l->t('Click here to get an API key')); ?></a>
 			</span>
 			<forecast-city-weather-panel 
-			:to-show="this.cityLoadError == '' && this.currentCity != null && this.currentCity.name !== undefined" 
-			:current-city="currentCity"
-			:selected-city="selectedCity"
-			:home-city="homeCity" />
+				:to-show="this.cityLoadError == '' && this.currentCity != null && this.currentCity.name !== undefined" 
+				:current-city="currentCity"
+				:selected-city="selectedCity"
+				:home-city="homeCity"
+				:metric="metric" />
 			
 			<forecast-city-forecast-panel
 				:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"
 				:forecast-items="currentCity.forecast"
+				:metric="metric"
 			></forecast-city-forecast-panel>
 		</div>
 </script>
@@ -118,7 +120,7 @@
 			<city-list ref="city-list" :selected-city="selectedCity"></city-list>
 			<settings-panel></settings-panel>
 		</left-panel>
-		<forecast-panel ref="forecast-panel" :selected-city="selectedCity" :home-city="homeCity" :key="selectedCity.name" />
+		<forecast-panel ref="forecast-panel" :selected-city="selectedCity" :home-city="homeCity" :key="selectedCity.name + '_' + metric" :metric="metric" />
 	</div>
 </script>
 

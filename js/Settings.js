@@ -8,7 +8,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		data: function settingsPanelData() {
 			return {
 				settingError: '',
-				sharedState: WeatherApp.data
+				metric: 'metric'
 			}
 		},
 		mixins: [WeatherApp.mixins.hasFatalError],
@@ -21,32 +21,32 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function loadMetricSuccess(data) {
 						if (!WeatherApp.utils.undef(data['metric'])) {
-							WeatherApp.data.metric = data['metric'];
+							WeatherApp.setMetric(this.metric = data['metric']);
+							// WeatherApp.data.metric = data['metric'];
 						}
 					}.bind(this))
 					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
-			}.bind(this),
+			},
 			modifyMetric: function modifyMetric() {
 				$.ajax({
 					type: 'POST',
 					url: OC.generateUrl('/apps/weather/settings/metric/set'),
-					data: { 'metric': WeatherApp.data.metric },
+					data: { 'metric': this.metric },
 					dataType: 'json'
 				})
 					.done(function modifyMetricSuccess(data) {
 						if (data != null && !WeatherApp.utils.undef(data['set'])) {
-							this.$root.$refs["forecast-panel"].loadCity();
-						}
-						else {
-							WeatherApp.SettingsPanel.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
+							WeatherApp.setMetric(this.metric);
+						} else {
+							this.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
 						}
 					}.bind(this))
 					.fail(function modifyMetricFail(r) {
 						if (r.status == 404) {
-							WeatherApp.SettingsPanel.settingError = t('weather', 'This metric is not known.');
+							this.settingError = t('weather', 'This metric is not known.');
 						}
 						else {
-							WeatherApp.SettingsPanel.settingError = this.g_error500;
+							this.settingError = this.g_error500;
 						}
 					}.bind(this));
 			}

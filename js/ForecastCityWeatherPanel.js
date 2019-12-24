@@ -8,7 +8,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			currentCity: { type: Object, default: function () { return {} } },
 			selectedCity: { type: Object, default: function () { return {} } },
 			homeCity: { type: Object, default: function () { return {} } },
-			toShow: { type: Boolean, default: false }
+			toShow: { type: Boolean, default: false },
+			metric: { type: String, default: "metric" }
 		},
 		methods: {
 			setHome: function setHome(cityId) {

@@ -61,7 +61,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		cityLoadError: '',
 		cityLoadNeedsAPIKey: false,
-		sharedState: WeatherApp.data
 	};
 
 	WeatherApp.ForecastPanel = Vue.component("forecast-panel",
@@ -72,16 +71,17 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			},
 			props: {
 				homeCity: { type: Object, default: function () { return {} } },
-				selectedCity: { type: Object, default: function () { return {} } }
+				selectedCity: { type: Object, default: function () { return {} } },
+				metric: { type: String, default: "" }
 			},
 			mixins: [WeatherApp.mixins.hasOwncloudAppImgPath],
 			methods: {
 				loadCity: function loadCity(city) {
 					if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
-						if (!WeatherApp.utils.undef(WeatherApp.data.selectedCity.name)) {
-							city = WeatherApp.data.selectedCity;
-						} else if (!WeatherApp.utils.undef(WeatherApp.data.homeCity.name)) {
-							city = WeatherApp.data.homeCity;
+						if (!WeatherApp.utils.undef(this.selectedCity.name)) {
+							city = this.selectedCity;
+						} else if (!WeatherApp.utils.undef(this.homeCity.name)) {
+							city = this.homeCity;
 						} else {
 							// if there is no selected city, nor home city, then CityList didn't initialize yet.
 							return;

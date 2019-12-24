@@ -42,7 +42,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							if (!WeatherApp.utils.undef(data['load']) && data['load']) {
 								var loadingCity = WeatherApp.utils.deepCopy(city);
 								loadingCity.id = data['id'];
-								WeatherApp.ForecastPanel.loadCity(loadingCity);
+								this.loadCity(loadingCity);
 							}
 							city.name = "";
 						}
