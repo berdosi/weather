@@ -10,61 +10,11 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		data: function cityListState() {
 			return {
-				item: 0,
-				list: [],
-				city: {
-					name: '',
-				},
-				cities: [],
-				addCityError: '',
-				showAddCity: false
+				cities: []
 			}
 		},
 		mixins: [WeatherApp.mixins.hasFatalError],
 		methods: {
-			addCity: function addCity(city) {
-				if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
-					this.addCityError = t('weather', 'Empty city name!');
-					return;
-				}
-
-				$.ajax({
-					type: 'POST',
-					url: OC.generateUrl('/apps/weather/city/add'),
-					data: { 'name': city.name },
-					dataType: 'json'
-				})
-					.done(function addCitySuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['id'])) {
-							this.cities.push({ "name": city.name, "id": data['id'] })
-							this.showAddCity = false;
-
-							if (!WeatherApp.utils.undef(data['load']) && data['load']) {
-								var loadingCity = WeatherApp.utils.deepCopy(city);
-								loadingCity.id = data['id'];
-								this.loadCity(loadingCity);
-							}
-							city.name = "";
-						}
-						else {
-							this.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
-						}
-					}.bind(this))
-					.fail(function addCityFail(r, textStatus, errorThrown) {
-						if (r.status == 401) {
-							this.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
-						}
-						else if (r.status == 404) {
-							this.addCityError = t('weather', 'No city with this name found.');
-						}
-						else if (r.status == 409) {
-							this.addCityError = t('weather', 'This city is already registered for your account.');
-						}
-						else {
-							this.addCityError = this.g_error500;
-						}
-					}.bind(this));
-			},
 			loadCities: function loadCities() {
 				$.ajax({
 					type: "GET",
@@ -92,41 +42,19 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					}.bind(this))
 					.fail(function loadCitiesFail(r) { this.fatalError(); }.bind(this));
 			},
-			loadCity: function loadCity(city) {
-				WeatherApp.setSelectedCity(city);
-			},
-			deleteCity: function deleteCity(city) {
-				if (WeatherApp.utils.undef(city)) {
-					console.error(WeatherApp.data.g_error500);
-					return;
-				}
+			removeCity: function removeCity(cityToRemove) {
+				// this method handles the removal from the model,
+				// while CityListItem.deleteCity() updates it on the server
+				this.cities = this.cities.filter(function citiesFilter(city) {
+					return city.id !== cityToRemove.id;
+				});
 
-				$.ajax({
-					type: 'POST',
-					url: OC.generateUrl('/apps/weather/city/delete'),
-					data: { 'id': city.id },
-					dataType: 'json'
-				})
-					.done(function deleteCitySuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['deleted'])) {
-							for (var i = 0; i < this.cities.length; i++) {
-								if (this.cities[i].id === city.id) {
-									this.cities.splice(i, 1);
-									// If current city is the removed city, select the first one instead
-									if (WeatherApp.data.selectedCity.id === city.id) {
-										this.selectedCityId = 0;
-									}
-									return;
-								}
-							}
-						}
-						else {
-							alert(t('weather', 'Failed to remove city. Please contact your administrator'));
-						}
-					}.bind(this))
-					.fail(function deleteCityFail(r) {
-						console.error(r, WeatherApp.data.g_error500);
-					}.bind(this));
+				// select the first item, if the selected item was removed
+				if (this.cities.find(function findSelectedCity(city) {
+					return city.id == this.selectedCity
+				}.bind(this)) == undefined) {
+					WeatherApp.setSelectedCity(this.cities[0]);
+				}
 			},
 			fatalError: function fatalError(e) {
 				console.error("fatal error", e);

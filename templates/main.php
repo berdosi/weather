@@ -7,30 +7,40 @@
 \OCP\Util::addScript('weather', 'ForecastCityWeatherPanel');
 \OCP\Util::addScript('weather', 'ForecastCityForecastPanel');
 \OCP\Util::addScript('weather', 'ForecastPanel');
+\OCP\Util::addScript('weather', 'CityListItem');
+\OCP\Util::addScript('weather', 'CityListAdd');
 \OCP\Util::addScript('weather', 'CityList');
 \OCP\Util::addScript('weather', 'App');
 \OCP\Util::addStyle('weather', 'style');
 ?>
+
+<script type="text/x-template" id="city-list-item-template">
+	<li :class="[city-list-item, { selected: city.id == selectedCity.id }]" :key="city.id">
+		<a href="#" v-on:click="loadCity(city)">{{ city.name }}</a>
+		<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
+	</li>
+</script>
+<script type="text/x-template" id="city-list-add-template">
+	<li>
+		<a href="#" v-on:click="(function(){ city.name = ''; addCityError = ''; showAddCity = !showAddCity; })()"><?php p($l->t('Add a city')); ?>...</a>
+		<div v-show="showAddCity == true" id="create-city">
+			<h1><?php p($l->t('Add city')); ?></h1>
+			<hr>
+			<h2><?php p($l->t('City name')); ?></h2>
+			<span class="city-form-error" v-show="addCityError != ''">{{ addCityError }}</span>
+			<form novalidate>
+				<input type="text" autofocus="autofocus" v-model="city.name" v-on:keyup.enter="addCity(city)" />
+				<input type="button" value="<?php p($l->t('Add')); ?>" v-on:click="addCity(city)" />
+				<input type="button" value="<?php p($l->t('Cancel')); ?>" v-on:click="showAddCity = false" />
+			</form>
+		</div>
+	</li>
+</script>
+
 <script type="text/x-template" id="city-list-template">
 	<ul class="city-list">
-			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == selectedCity.id }]" :key="city.id">
-				<a href="#" v-on:click="loadCity(city)">{{ city.name }}</a>
-				<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
-			</li>
-			<li>
-				<a href="#" v-on:click="(function(){ city.name = ''; addCityError = ''; showAddCity = !showAddCity; })()"><?php p($l->t('Add a city')); ?>...</a>
-				<div v-show="showAddCity == true" id="create-city">
-					<h1><?php p($l->t('Add city')); ?></h1>
-					<hr>
-					<h2><?php p($l->t('City name')); ?></h2>
-					<span class="city-form-error" v-show="addCityError != ''">{{ addCityError }}</span>
-					<form novalidate>
-						<input type="text" autofocus="autofocus" v-model="city.name" v-on:keyup.enter="addCity(city)" />
-						<input type="button" value="<?php p($l->t('Add')); ?>" v-on:click="addCity(city)" />
-						<input type="button" value="<?php p($l->t('Cancel')); ?>" v-on:click="showAddCity = false" />
-					</form>
-				</div>
-			</li>
+			<city-list-item v-for="city in cities" :key="city.id" :selected-city="selectedCity" :city="city" />
+			<city-list-add />
 		</ul>
 </script>
 <script type="text/x-template" id="settings-panel-template">
