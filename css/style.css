@@ -219,7 +219,7 @@
 }
 }
 
-#app {
+#app, #app-container {
 	width: 100%;
 }
 

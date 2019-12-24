@@ -6,17 +6,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 	Vue.component("forecast-city-weather-panel", {
 		props: {
 			currentCity: { type: Object, default: function () { return {} } },
+			selectedCity: { type: Object, default: function () { return {} } },
+			homeCity: { type: Object, default: function () { return {} } },
 			toShow: { type: Boolean, default: false }
-		},
-		data: function () {
-			return {
-				sharedState: WeatherApp.data
-			}
 		},
 		methods: {
 			setHome: function setHome(cityId) {
 				if (WeatherApp.utils.undef(cityId)) {
-					console.error(WeatherApp.data.g_error500);
+					console.error(this.g_error500);
 					return;
 				}
 
@@ -28,32 +25,32 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				})
 					.done(function setHomeSuccess(data) {
 						if (data != null && !WeatherApp.utils.undef(data['set'])) {
-							WeatherApp.data.homeCity = {
+							WeatherApp.setHomeCity({
 								id: cityId,
 								name: this.$root.$refs["city-list"].cities.find(function findCityName(city) { return city.id === cityId }).name
-							}; // TODO set the name as well
+							});
 						}
 						else {
 							alert(t('weather', 'Failed to set home. Please contact your administrator'));
 						}
 					}.bind(this))
 					.fail(function setHomeFail(r) {
-						console.error(r, WeatherApp.data.g_error500);
-					}.bind(WeatherApp.ForecastPanel));
+						console.error(r, this.g_error500);
+					}.bind(this));
 			}
 		},
-		mixins: [WeatherApp.mixins.hasMetricRepresentation, WeatherApp.mixins.hasOwncloudAppImgPath],
+		mixins: [WeatherApp.mixins.hasMetricRepresentation, WeatherApp.mixins.hasOwncloudAppImgPath, WeatherApp.mixins.hasFatalError],
 		computed: {
-			isHomeCity:      function() { return this.sharedState.selectedCity.id == (this.sharedState.homeCity || {}).id},
-			name:            function() { return this.currentCity.name },
-			country:         function() { return this.currentCity.country },
-			temp:            function() { return parseFloat(this.currentCity.main.temp) },
-			pressure:        function() { return parseFloat(this.currentCity.main.pressure) },
-			humidity:        function() { return parseFloat(this.currentCity.main.humidity) },
-			description:     function() { return this.currentCity.weather[0].description },
-			selectedCityId:  function() { return this.sharedState.selectedCity.id },
-			sunrise:         function() { return this.currentCity.sys.sunrise },
-			sunset:          function() { return this.currentCity.sys.sunset },
+			isHomeCity: function () { return this.selectedCity.id == (this.homeCity || {}).id },
+			name: function () { return this.currentCity.name },
+			country: function () { return this.currentCity.country },
+			temp: function () { return this.currentCity.main.temp },
+			pressure: function () { return this.currentCity.main.pressure },
+			humidity: function () { return this.currentCity.main.humidity },
+			description: function () { return this.currentCity.weather[0].description },
+			selectedCityId: function () { return this.selectedCity.id },
+			sunrise: function () { return this.currentCity.sys.sunrise },
+			sunset: function () { return this.currentCity.sys.sunset },
 			windDescription: function getWindDescription(degrees) {
 				if (degrees < 23) return t('weather', 'North');
 				if (degrees < 67) return t('weather', 'North-East');
@@ -65,7 +62,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				if (degrees < 333) return t('weather', 'North-West');
 				if (degrees > 332) return t('weather', 'North');
 			},
-			windSpeed:       function() { return parseFloat(this.currentCity.wind.speed) }
+			windSpeed: function () { return parseFloat(this.currentCity.wind.speed) }
 		},
 		filters: {
 			date: function formatDate(rawValue, formatString) {

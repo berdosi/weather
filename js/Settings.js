@@ -4,7 +4,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 	'use strict';
 
 	WeatherApp.SettingsPanel = Vue.component("settings-panel", {
-		// el: '#app-settings',
 		template: "#settings-panel-template",
 		data: function settingsPanelData() {
 			return {
@@ -12,6 +11,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				sharedState: WeatherApp.data
 			}
 		},
+		mixins: [WeatherApp.mixins.hasFatalError],
 		methods: {
 			loadMetric: function loadMetric() {
 				$.ajax({
@@ -46,7 +46,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							WeatherApp.SettingsPanel.settingError = t('weather', 'This metric is not known.');
 						}
 						else {
-							WeatherApp.SettingsPanel.settingError = WeatherApp.data.g_error500;
+							WeatherApp.SettingsPanel.settingError = this.g_error500;
 						}
 					}.bind(this));
 			}

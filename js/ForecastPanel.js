@@ -3,69 +3,76 @@ var weatherAppGlobal = weatherAppGlobal || {};
 (function (window, $, WeatherApp, Vue) {
 	'use strict';
 
+	// when updating the props due to change of selected city, 
+	// the component should be reinitialized with the prior data first
+	// Using a cache lets us avoid a visible flicker.
+	WeatherApp.ForecastPanelDataCache = {
+		currentCity: {
+			forecast: [{
+				date: '',
+				temperature: '',
+				weather: '',
+				pressure: '',
+				humidity: '',
+				wind: {
+					speed: '',
+					desc: ''
+				}
+			}],
+			name: undefined,
+			main: {
+				humidity: '',
+				pressure: '',
+				temp: ''
+			},
+			image: undefined,
+			sys: {
+				country: undefined,
+				sunrise: 0,
+				sunset: 0
+			},
+			weather: [
+				{
+					main: '',
+					description: ''
+				}
+			],
+			wind: {
+				desc: undefined,
+				deg: undefined
+			},
+		},
+		imageMapper: {
+			Clear: "sun.jpg",
+			Clouds: "clouds.png",
+			Drizzle: "drizzle.jpg",
+			Smoke: "todo.png",
+			Dust: "todo.png",
+			Sand: "sand.jpg",
+			Ash: "todo.png",
+			Squall: "todo.png",
+			Tornado: "tornado.jpg",
+			Haze: "mist.jpg",
+			Mist: "mist.jpg",
+			Rain: "rain.jpg",
+			Snow: "snow.png",
+			Thunderstorm: "thunderstorm.jpg",
+			Fog: "fog.jpg",
+		},
+		cityLoadError: '',
+		cityLoadNeedsAPIKey: false,
+		sharedState: WeatherApp.data
+	};
+
 	WeatherApp.ForecastPanel = Vue.component("forecast-panel",
-		// WeatherApp.ForecastPanel = new Vue(
 		{
 			template: "#forecast-panel-template",
-			// el: '#city-right',
 			data: function ForecastPanelData() {
-				return {
-					currentCity: {
-						forecast: [{
-							date: '',
-							temperature: '',
-							weather: '',
-							pressure: '',
-							humidity: '',
-							wind: {
-								speed: '',
-								desc: ''
-							}
-						}],
-						name: undefined,
-						main: {
-							humidity: '',
-							pressure: '',
-							temp: ''
-						},
-						image: undefined,
-						sys: {
-							country: undefined,
-							sunrise: 0,
-							sunset: 0
-						},
-						weather: [
-							{
-								main: '',
-								description: ''
-							}
-						],
-						wind: {
-							desc: undefined,
-							deg: undefined
-						},
-					},
-					imageMapper: {
-						Clear: "sun.jpg",
-						Clouds: "clouds.png",
-						Drizzle: "drizzle.jpg",
-						Smoke: "todo.png",
-						Dust: "todo.png",
-						Sand: "sand.jpg",
-						Ash: "todo.png",
-						Squall: "todo.png",
-						Tornado: "tornado.jpg",
-						Haze: "mist.jpg",
-						Mist: "mist.jpg",
-						Rain: "rain.jpg",
-						Snow: "snow.png",
-						Thunderstorm: "thunderstorm.jpg",
-						Fog: "fog.jpg",
-					},
-					cityLoadError: '',
-					cityLoadNeedsAPIKey: false,
-					sharedState: WeatherApp.data
-				}
+				return WeatherApp.ForecastPanelDataCache
+			},
+			props: {
+				homeCity: { type: Object, default: function () { return {} } },
+				selectedCity: { type: Object, default: function () { return {} } }
 			},
 			mixins: [WeatherApp.mixins.hasOwncloudAppImgPath],
 			methods: {
@@ -87,42 +94,42 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						dataType: 'json'
 					})
 						.done(function loadCitySuccess(data) {
+							var cache = WeatherApp.ForecastPanelDataCache;
+
 							if (data != null) {
-								this.currentCity = WeatherApp.utils.deepCopy(data);
-								var componentData = WeatherApp.ForecastPanel.extendOptions.data();
-								this.currentCity.image = componentData.imageMapper[this.currentCity.weather[0].main];
-								this.cityLoadError = '';
+								cache.currentCity = this.currentCity = WeatherApp.utils.deepCopy(data);
+								cache.currentCity.image = this.currentCity.image = this.imageMapper[this.currentCity.weather[0].main];
+								cache.cityLoadError = this.cityLoadError = '';
 							}
 							else {
-								this.cityLoadError = t('weather', 'Failed to get city weather informations. Please contact your administrator');
+								cache.cityLoadError = this.cityLoadError = t('weather', 'Failed to get city weather informations. Please contact your administrator');
 							}
 							this.cityLoadNeedsAPIKey = false;
 						}.bind(this))
 						.fail(function loadCityFail(jqXHR, textStatus, errorThrown) {
+							var cache = WeatherApp.ForecastPanelDataCache;
 
 							if (jqXHR.status == 404) {
-								this.cityLoadError = t('weather', 'No city with this name found.');
-								this.cityLoadNeedsAPIKey = false;
+								cache.cityLoadError = this.cityLoadError = t('weather', 'No city with this name found.');
+								cache.cityLoadNeedsAPIKey = this.cityLoadNeedsAPIKey = false;
 							}
 							else if (jqXHR.status == 401) {
-								this.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
-								this.cityLoadNeedsAPIKey = true;
+								cache.cityLoadError = this.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
+								cache.cityLoadNeedsAPIKey = this.cityLoadNeedsAPIKey = true;
 							}
 							else {
-								this.cityLoadError = WeatherApp.data.g_error500;
-								this.cityLoadNeedsAPIKey = false;
+								cache.cityLoadError = this.cityLoadError = WeatherApp.data.g_error500;
+								cache.cityLoadNeedsAPIKey = this.cityLoadNeedsAPIKey = false;
 							}
 						}.bind(this));
 				},
 			},
 			created: function ForecastPanelCreated() {
 				window.setInterval(function () {
-					if (this.currentCity != null) { // TODO update cities anyway
-						this.loadCity(this.domCity); // todo load domcity , 
-					}
+						this.loadCity(); 
 				}.bind(this), 60000);
 			},
-			mounted: function() {
+			mounted: function () {
 				this.loadCity();
 			}
 		});

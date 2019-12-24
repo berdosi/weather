@@ -5,6 +5,9 @@ var weatherAppGlobal = weatherAppGlobal || {};
 
 	WeatherApp.CityList = Vue.component("city-list", {
 		template: "#city-list-template",
+		props: {
+			selectedCity: { type: Object, default: function () { return {} } }
+		},
 		data: function cityListState() {
 			return {
 				item: 0,
@@ -14,11 +17,10 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				},
 				cities: [],
 				addCityError: '',
-				showAddCity: false,
-
-				sharedState: WeatherApp.data
+				showAddCity: false
 			}
 		},
+		mixins: [WeatherApp.mixins.hasFatalError],
 		methods: {
 			addCity: function addCity(city) {
 				if (WeatherApp.utils.undef(city) || WeatherApp.utils.emptyStr(city.name)) {
@@ -59,7 +61,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							this.addCityError = t('weather', 'This city is already registered for your account.');
 						}
 						else {
-							this.addCityError = WeatherApp.data.g_error500;
+							this.addCityError = this.g_error500;
 						}
 					}.bind(this));
 			},
@@ -75,15 +77,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						}
 
 						if (!WeatherApp.utils.undef(data['home'])) {
-							WeatherApp.data.homeCity =
-								data['cities'].find(function homeCityFilter(city) { return city.id == data['home'] });
+							WeatherApp.setHomeCity(
+								data['cities'].find(function homeCityFilter(city) { return city.id == data['home'] }));
 
 							// if the home city has just been deleted, select the first one instead
-							WeatherApp.data.selectedCity = WeatherApp.utils.deepCopy(
+							WeatherApp.setSelectedCity(WeatherApp.utils.deepCopy(
 								WeatherApp.utils.undef(WeatherApp.data.homeCity)
 									? data['cities'][0]
-									: WeatherApp.data.homeCity);
-							this.loadCity(WeatherApp.data.selectedCity);
+									: WeatherApp.data.homeCity));
 						}
 						else if (this.cities.length > 0) { // If no home found, load first city found
 							this.loadCity(this.cities[0]);
@@ -92,8 +93,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					.fail(function loadCitiesFail(r) { this.fatalError(); }.bind(this));
 			},
 			loadCity: function loadCity(city) {
-				WeatherApp.data.selectedCity = city;
-				this.$root.$refs["forecast-panel"].loadCity(city);
+				WeatherApp.setSelectedCity(city);
 			},
 			deleteCity: function deleteCity(city) {
 				if (WeatherApp.utils.undef(city)) {
@@ -112,9 +112,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							for (var i = 0; i < this.cities.length; i++) {
 								if (this.cities[i].id === city.id) {
 									this.cities.splice(i, 1);
-									// If current city is the removed city, close it
+									// If current city is the removed city, select the first one instead
 									if (WeatherApp.data.selectedCity.id === city.id) {
-										WeatherApp.data.currentCity = null;
 										this.selectedCityId = 0;
 									}
 									return;

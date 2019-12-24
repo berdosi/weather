@@ -5,8 +5,15 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		metric: 'metric',
 		selectedCity: {},
 		homeCity: {},
-		g_error500: t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues')
 	};
+
+	WeatherApp.setSelectedCity = function setSelectedCity(city) {
+		WeatherApp.data.selectedCity = city;
+	};
+	WeatherApp.setHomeCity = function setHomeCity(city) {
+		WeatherApp.data.homeCity = city;
+	}
+
 
 	WeatherApp.utils = {
 		undef: function undef(obj) {
@@ -40,6 +47,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			data: function () {
 				return {
 					owncloudAppImgPath: OC.filePath('weather', 'img', '').replace('index.php/', '')
+				}
+			}
+		},
+		hasFatalError: {
+			data: function () {
+				return {
+					g_error500: t('weather', 'Fatal Error: please check your nextcloud.log and send a bug report here: https://github.com/nextcloud/weather/issues')
 				}
 			}
 		}

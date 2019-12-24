@@ -13,7 +13,7 @@
 ?>
 <script type="text/x-template" id="city-list-template">
 	<ul class="city-list">
-			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == sharedState.selectedCity.id }]" :key="city.id">
+			<li v-for="city in cities" :class="[city-list-item, { selected: city.id == selectedCity.id }]" :key="city.id">
 				<a href="#" v-on:click="loadCity(city)">{{ city.name }}</a>
 				<div class="icon-delete svn delete action" v-on:click="deleteCity(city)" ></div>
 			</li>
@@ -102,7 +102,9 @@
 			</span>
 			<forecast-city-weather-panel 
 			:to-show="this.cityLoadError == '' && this.currentCity != null && this.currentCity.name !== undefined" 
-			:current-city="currentCity" />
+			:current-city="currentCity"
+			:selected-city="selectedCity"
+			:home-city="homeCity" />
 			
 			<forecast-city-forecast-panel
 				:to-show="cityLoadError == '' && currentCity != null && currentCity.name !== undefined"
@@ -110,11 +112,15 @@
 			></forecast-city-forecast-panel>
 		</div>
 </script>
+<script type="text/x-template" id="weather-app-template">
+	<div id="app-container">
+		<left-panel>
+			<city-list ref="city-list" :selected-city="selectedCity"></city-list>
+			<settings-panel></settings-panel>
+		</left-panel>
+		<forecast-panel ref="forecast-panel" :selected-city="selectedCity" :home-city="homeCity" :key="selectedCity.name" />
+	</div>
+</script>
 
 <div id="app">
-	<left-panel>
-		<city-list ref="city-list"></city-list>
-		<settings-panel></settings-panel>
-	</left-panel>
-	<forecast-panel ref="forecast-panel" />
 </div>
