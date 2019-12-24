@@ -1,15 +1,15 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function ($, WeatherApp, Vue, OC, t) {
 	'use strict';
 
 	WeatherApp.CityListItems = Vue.component("city-list-item", {
 		template: "#city-list-item-template",
 		props: {
-			city: { type: Object, default: function () { return {} } },
-			selectedCity: { type: Object, default: function () { return {} } },
+			city: { type: Object, default: function () { return {}; } },
+			selectedCity: { type: Object, default: function () { return {}; } },
 			item: { type: Number, default: -1 },
-			list: { type: Array, default: function () { return [] } }
+			list: { type: Array, default: function () { return []; } }
 		},
 		methods: {
 			deleteCity: function deleteCity(city) {
@@ -27,8 +27,8 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function deleteCitySuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['deleted'])) {
-							this.$parent.removeCity(this.city)
+						if (data !== null && !WeatherApp.utils.undef(data.deleted)) {
+							this.$parent.removeCity(this.city);
 						}
 						else {
 							alert(t('weather', 'Failed to remove city. Please contact your administrator'));
@@ -43,4 +43,4 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			}
 		}
 	});
-})(window, $, weatherAppGlobal, Vue)
+}($, weatherAppGlobal, Vue, OC, t));

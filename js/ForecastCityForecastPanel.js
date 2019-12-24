@@ -1,6 +1,6 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function (WeatherApp, Vue) {
 	'use strict';
 
 	Vue.component("forecast-city-forecast-panel", {
@@ -11,5 +11,5 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		mixins: [WeatherApp.mixins.hasMetricRepresentation],
 		template: "#forecast-forecast-panel-template"
-	})
-})(window, jQuery, weatherAppGlobal, Vue)
+	});
+}(weatherAppGlobal, Vue));

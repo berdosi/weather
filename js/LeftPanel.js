@@ -1,10 +1,10 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function (Vue) {
 	'use strict';
 
 	Vue.component("left-panel",
 		{
 			template: "#left-panel-template",
-		})
-})(window, jQuery, weatherAppGlobal, Vue)
+		});
+}(Vue));

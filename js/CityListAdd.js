@@ -1,6 +1,6 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function ($, WeatherApp, Vue, OC, t) {
 	'use strict';
 
 	WeatherApp.CityListItems = Vue.component("city-list-add", {
@@ -12,7 +12,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				},
 				addCityError: '',
 				showAddCity: false
-			}
+			};
 		},
 		methods: {
 			addCity: function addCity(city) {
@@ -28,13 +28,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function addCitySuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['id'])) {
-							this.$parent.cities.push({ "name": city.name, "id": data['id'] });
+						if (data !== null && !WeatherApp.utils.undef(data.id)) {
+							this.$parent.cities.push({ "name": city.name, "id": data.id });
 							this.showAddCity = false;
 
-							if (!WeatherApp.utils.undef(data['load']) && data['load']) {
+							if (!WeatherApp.utils.undef(data.load) && data.load) {
 								var loadingCity = WeatherApp.utils.deepCopy(city);
-								loadingCity.id = data['id'];
+								loadingCity.id = data.id;
 								this.loadCity(loadingCity);
 							}
 							city.name = "";
@@ -43,14 +43,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							this.addCityError = t('weather', 'Failed to add city. Please contact your administrator');
 						}
 					}.bind(this))
-					.fail(function addCityFail(r, textStatus, errorThrown) {
-						if (r.status == 401) {
+					.fail(function addCityFail(r) {
+						if (r.status === 401) {
 							this.addCityError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
 						}
-						else if (r.status == 404) {
+						else if (r.status === 404) {
 							this.addCityError = t('weather', 'No city with this name found.');
 						}
-						else if (r.status == 409) {
+						else if (r.status === 409) {
 							this.addCityError = t('weather', 'This city is already registered for your account.');
 						}
 						else {
@@ -62,5 +62,5 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				WeatherApp.setSelectedCity(city);
 			}
 		}
-	})
-})(window, jQuery, weatherAppGlobal, Vue)
+	});
+}(jQuery, weatherAppGlobal, Vue, OC, t));

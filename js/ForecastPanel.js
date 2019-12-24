@@ -1,6 +1,6 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function (window, $, WeatherApp, Vue, OC, t) {
 	'use strict';
 
 	// when updating the props due to change of selected city, 
@@ -68,11 +68,11 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		{
 			template: "#forecast-panel-template",
 			data: function ForecastPanelData() {
-				return WeatherApp.ForecastPanelDataCache
+				return WeatherApp.ForecastPanelDataCache;
 			},
 			props: {
-				homeCity: { type: Object, default: function () { return {} } },
-				selectedCity: { type: Object, default: function () { return {} } },
+				homeCity: { type: Object, default: function () { return {}; } },
+				selectedCity: { type: Object, default: function () { return {}; } },
 				metric: { type: String, default: "" }
 			},
 			mixins: [WeatherApp.mixins.hasOwncloudAppImgPath],
@@ -97,7 +97,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 						.done(function loadCitySuccess(data) {
 							var cache = WeatherApp.ForecastPanelDataCache;
 
-							if (data != null) {
+							if (data !== null) {
 								cache.currentCity = this.currentCity = WeatherApp.utils.deepCopy(data);
 								cache.currentCity.image = this.currentCity.image = this.imageMapper[this.currentCity.weather[0].main];
 								cache.cityLoadError = this.cityLoadError = '';
@@ -107,14 +107,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 							}
 							this.cityLoadNeedsAPIKey = false;
 						}.bind(this))
-						.fail(function loadCityFail(jqXHR, textStatus, errorThrown) {
+						.fail(function loadCityFail(jqXHR) {
 							var cache = WeatherApp.ForecastPanelDataCache;
 
-							if (jqXHR.status == 404) {
+							if (jqXHR.status === 404) {
 								cache.cityLoadError = this.cityLoadError = t('weather', 'No city with this name found.');
 								cache.cityLoadNeedsAPIKey = this.cityLoadNeedsAPIKey = false;
 							}
-							else if (jqXHR.status == 401) {
+							else if (jqXHR.status === 401) {
 								cache.cityLoadError = this.cityLoadError = t('weather', 'Your OpenWeatherMap API key is invalid. Contact your administrator to configure a valid API key in Additional Settings of the Administration');
 								cache.cityLoadNeedsAPIKey = this.cityLoadNeedsAPIKey = true;
 							}
@@ -128,12 +128,10 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			created: function ForecastPanelCreated() {
 				window.clearInterval(WeatherApp.ForecastPanelDataCache.refreshInterval);
 				WeatherApp.ForecastPanelDataCache.refreshInterval = this.refreshInterval = window.setInterval(function () {
-						console.log("weather - loadcity");
 						this.loadCity(); 
 				}.bind(this), 60000);
-				console.log("weather - intervalset", this.refreshInterval);
 
 				this.loadCity();
 			}
 		});
-})(window, jQuery, weatherAppGlobal, Vue);
+}(window, jQuery, weatherAppGlobal, Vue, OC, t));

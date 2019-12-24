@@ -1,6 +1,6 @@
 var weatherAppGlobal = weatherAppGlobal || {};
 
-(function (window, $, WeatherApp, Vue) {
+(function ($, WeatherApp, Vue, OC, t) {
 	'use strict';
 
 	WeatherApp.SettingsPanel = Vue.component("settings-panel", {
@@ -9,7 +9,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 			return {
 				settingError: '',
 				metric: 'metric'
-			}
+			};
 		},
 		mixins: [WeatherApp.mixins.hasFatalError],
 		methods: {
@@ -20,11 +20,12 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function loadMetricSuccess(data) {
-						if (!WeatherApp.utils.undef(data['metric'])) {
-							WeatherApp.setMetric(this.metric = data['metric']);
+						if (!WeatherApp.utils.undef(data.metric)) {
+							this.metric = data.metric;
+							WeatherApp.setMetric(this.metric);
 						}
 					}.bind(this))
-					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
+					.fail(function loadMetricFail() { this.fatalError(); }.bind(this));
 			},
 			modifyMetric: function modifyMetric() {
 				$.ajax({
@@ -34,14 +35,14 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					dataType: 'json'
 				})
 					.done(function modifyMetricSuccess(data) {
-						if (data != null && !WeatherApp.utils.undef(data['set'])) {
+						if (data !== null && !WeatherApp.utils.undef(data.set)) {
 							WeatherApp.setMetric(this.metric);
 						} else {
 							this.settingError = t('weather', 'Failed to set metric. Please contact your administrator');
 						}
 					}.bind(this))
 					.fail(function modifyMetricFail(r) {
-						if (r.status == 404) {
+						if (r.status === 404) {
 							this.settingError = t('weather', 'This metric is not known.');
 						}
 						else {
@@ -55,4 +56,4 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		}
 	});
 
-})(window, jQuery, weatherAppGlobal, Vue);
+}(jQuery, weatherAppGlobal, Vue, OC, t));
