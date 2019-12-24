@@ -22,7 +22,6 @@ var weatherAppGlobal = weatherAppGlobal || {};
 					.done(function loadMetricSuccess(data) {
 						if (!WeatherApp.utils.undef(data['metric'])) {
 							WeatherApp.setMetric(this.metric = data['metric']);
-							// WeatherApp.data.metric = data['metric'];
 						}
 					}.bind(this))
 					.fail(function loadMetricFail() { weatherApp.fatalError(); }.bind(this));
