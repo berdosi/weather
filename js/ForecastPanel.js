@@ -61,6 +61,7 @@ var weatherAppGlobal = weatherAppGlobal || {};
 		},
 		cityLoadError: '',
 		cityLoadNeedsAPIKey: false,
+		refreshInterval: -1
 	};
 
 	WeatherApp.ForecastPanel = Vue.component("forecast-panel",
@@ -125,11 +126,13 @@ var weatherAppGlobal = weatherAppGlobal || {};
 				},
 			},
 			created: function ForecastPanelCreated() {
-				window.setInterval(function () {
+				window.clearInterval(WeatherApp.ForecastPanelDataCache.refreshInterval);
+				WeatherApp.ForecastPanelDataCache.refreshInterval = this.refreshInterval = window.setInterval(function () {
+						console.log("weather - loadcity");
 						this.loadCity(); 
 				}.bind(this), 60000);
-			},
-			mounted: function () {
+				console.log("weather - intervalset", this.refreshInterval);
+
 				this.loadCity();
 			}
 		});
