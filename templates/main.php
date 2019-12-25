@@ -125,7 +125,7 @@
 		</div>
 </script>
 <script type="text/x-template" id="weather-app-template">
-	<div id="app-container">
+	<div id="app">
 		<left-panel>
 			<city-list ref="city-list" :selected-city="selectedCity"></city-list>
 			<settings-panel></settings-panel>
